@@ -14,6 +14,7 @@ import "@xyflow/react/dist/style.css";
 import { KanbanSquare, GitBranch, Play, Bot, Zap, CircleDot, CheckCircle2, Clock, AlertCircle, Sparkles } from "lucide-react";
 import { api } from "../lib/api/client";
 import { useWorkflowStore, type WorkflowNode, type WorkflowInstance } from "../stores/workflowStore";
+import { WorkflowCreateButton } from "../components/WorkflowCreateButton";
 import { clsx } from "clsx";
 
 // ── Custom Node Component ──
@@ -248,6 +249,7 @@ export function WorkflowPage() {
           <p className="text-sm text-zinc-500 mt-1">워크플로우를 정의하고, 실행 상태를 모니터링합니다</p>
         </div>
         <div className="flex items-center gap-2">
+          <WorkflowCreateButton projectId={projectId} />
           <button
             onClick={handleAutoDetect}
             disabled={detecting || !projectId}
