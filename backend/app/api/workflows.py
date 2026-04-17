@@ -3,7 +3,6 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,6 +15,7 @@ from app.schemas.workflow import (
     InstanceCreate,
     InstanceOut,
     InstanceUpdate,
+    TemplateCreateRequest,
     WorkflowCreate,
     WorkflowOut,
     WorkflowUpdate,
@@ -25,11 +25,6 @@ from app.services.workflow_classifier import classify_workflow
 from app.services.workflow_sync import export_workflow, import_workflows
 
 router = APIRouter(prefix="/api/v1/workflows", tags=["workflows"])
-
-
-class TemplateCreateRequest(BaseModel):
-    project_id: uuid.UUID
-    template_name: str
 
 
 # ── Workflow templates (must be declared BEFORE /{wf_id} to avoid path conflicts) ──

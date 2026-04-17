@@ -30,6 +30,11 @@ class WorkflowCreate(BaseModel):
     edges: list[WorkflowEdgeSchema] = []
 
 
+class TemplateCreateRequest(BaseModel):
+    project_id: uuid.UUID
+    template_name: str
+
+
 class WorkflowUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
