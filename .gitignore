@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Node
+node_modules/
+.next/
+dist/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres-data/
+
+# Claude Code (auto-generated, project-specific)
+.claude/memory/*.local.md
+.claude/compact-snapshots/
+
+# Logs
+*.log
+logs/
