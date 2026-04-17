@@ -12,7 +12,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { KanbanSquare, GitBranch, Play, Bot, Zap, CircleDot, CheckCircle2, Clock, AlertCircle, Sparkles } from "lucide-react";
-import { api } from "../lib/api/client";
+import { api, subscribeSSE, type SSEEvent } from "../lib/api/client";
 import { useWorkflowStore, type WorkflowNode, type WorkflowInstance } from "../stores/workflowStore";
 import { WorkflowCreateButton } from "../components/WorkflowCreateButton";
 import { WorkflowEditActions } from "../components/WorkflowEditActions";
@@ -220,6 +220,21 @@ export function WorkflowPage() {
       fetchInstances(selectedWorkflowId);
     }
   }, [selectedWorkflowId, fetchInstances]);
+
+  // Cross-tab / other-client sync: refetch on workflow/instance mutations.
+  useEffect(() => {
+    if (!projectId) return;
+    const onEvent = (evt: SSEEvent) => {
+      const t = evt.type;
+      if (t === "workflow_created" || t === "workflow_updated" || t === "workflow_deleted") {
+        void fetchWorkflows(projectId);
+      } else if (t === "instance_created" || t === "instance_updated") {
+        const current = useWorkflowStore.getState().selectedWorkflowId;
+        if (current) void fetchInstances(current);
+      }
+    };
+    return subscribeSSE("/stream/events", onEvent);
+  }, [projectId, fetchWorkflows, fetchInstances]);
 
   const handleAutoDetect = async () => {
     if (!projectId) return;

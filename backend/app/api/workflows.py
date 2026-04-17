@@ -224,8 +224,10 @@ async def delete_workflow(wf_id: uuid.UUID, db: AsyncSession = Depends(get_db)) 
     wf = await db.get(Workflow, wf_id)
     if not wf:
         raise HTTPException(404, "Workflow not found")
+    wf_name = wf.name
     await db.delete(wf)
     await db.commit()
+    await broadcaster.broadcast("workflow_deleted", {"id": str(wf_id), "name": wf_name})
 
 
 # ── Workflow instances ──

@@ -37,6 +37,11 @@ const SSE_EVENT_TYPES = [
   "watcher_stopped",
   "ingest_complete",
   "channel_message",
+  "workflow_created",
+  "workflow_updated",
+  "workflow_deleted",
+  "instance_created",
+  "instance_updated",
 ] as const;
 
 function parseSSE(e: MessageEvent): SSEEvent | null {
