@@ -1,5 +1,5 @@
-# 현재 Phase: Phase 7 — 문서 뷰어 + 코드-문서 링크
-> 최종 업데이트: 2026-04-16
+# 현재 상태: Phase 7 완료 — 핵심 모듈(A~G) 구현 완료
+> 최종 업데이트: 2026-04-17
 
 ## Phase 0 완료 (프로젝트 초기화)
 - [x] 프로젝트 구조 설계 + 기술 스택 확정 (2026-04-16)
@@ -88,5 +88,13 @@
 - [x] FE 커밋 관련 문서 배지 — ChangesPage (2026-04-16)
 - [x] 빌드 검증 — BE + FE 통과 (2026-04-16)
 
-## PRD 전체 완료
-모든 모듈(A~G) 구현 완료. 추가 고도화는 사용자 피드백 기반으로 진행.
+## 전체 상태
+핵심 모듈(A~G) 구현 완료. 아래 항목은 deferred (고도화 과제):
+- Module A: 표준 문서 유형별 전용 뷰 (정책 테이블, 스키마 ERD 등) — Mock만 존재
+- sync_documents 인라인 임베딩 부하 완화 (대규모 프로젝트 등록 시 백그라운드화 검토)
+
+## Phase 7 이후 유지보수 (2026-04-17)
+- [x] 공유 인제스트 서비스 추출 — services/ingest.py (sync_documents + /memories/ingest 공통화)
+- [x] IngestRequest 스키마 정리 — 무시되던 wing/room 필드 제거
+- [x] MCP search_memories 도구 설명에 "pure vector (non-hybrid)" 명시
+- [x] prd.md / roadmap.md / quick-ref.md 전면 동기화

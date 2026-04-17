@@ -1,5 +1,5 @@
 # zm-codex 로드맵
-> 최종 업데이트: 2026-04-16
+> 최종 업데이트: 2026-04-17
 
 ## Phase 0: 프로젝트 초기화 — 완료
 - [x] 프로젝트 구조 설계
@@ -34,10 +34,32 @@
 - [x] 변경 추적 API (git + 문서 + 훅 통합)
 - [x] FE Changes 페이지 (실제 API 연동)
 
-## Phase 5: Channel 서버 + 고도화 — 대기
-- [ ] Channel MCP 서버 (Node.js, Web→Claude Code 메시지 주입)
-- [ ] MCP 도구 (Claude Code→Web 워크플로우 조작)
-- [ ] 워크플로우 자동 판단 (커밋 패턴 기반)
-- [ ] .claude/workflows/*.md 양방향 파일 동기화
-- [ ] 파일 감시 + 자동 인덱싱 (watchfiles)
-- [ ] 드리프트 감지
+## Phase 5: File Watcher + MCP Server — 완료
+- [x] sync 서비스 추출 (services/sync.py)
+- [x] 파일 감시 + 자동 인덱싱 (watchfiles.awatch)
+- [x] 드리프트 감지 (services/drift.py, GET /watcher/drift)
+- [x] MCP 서버 (JSON-RPC 2.0 Streamable HTTP, 5개 도구)
+- [x] FE Watcher 페이지 + SSE 이벤트 확장
+
+## Phase 5b: 워크플로우 자동화 + 설정 이력 — 완료
+- [x] 워크플로우 자동 판단 (커밋 패턴 기반)
+- [x] .claude/workflows/*.md 양방향 파일 동기화
+- [x] 설정 변경 이력 DB + API (config_changes 테이블)
+- [x] FE 워크플로우 자동 감지 버튼 + 설정 이력 섹션
+
+## Phase 6: Channel 서버 + 템플릿 + BM25 — 완료
+- [x] BM25 하이브리드 검색 (BM25 40% + 벡터 60%)
+- [x] 템플릿 생성/적용 서비스 (.claude/ 구조 추출·주입)
+- [x] Channel 서버 (Web→Claude Code 역방향 큐, asyncio.Queue)
+- [x] FE 템플릿 생성 버튼 + channel_message SSE
+
+## Phase 7: 문서 뷰어 + 코드-문서 링크 — 완료
+- [x] CodeDocLink 모델 (code_doc_links 테이블)
+- [x] 자동 링크 탐지 서비스 (경로 + 키워드 매칭)
+- [x] Changes 타임라인에 linked_documents 필드 확장
+- [x] FE DocumentsPage 관련 커밋 섹션 + ChangesPage 문서 배지
+
+## 이후 계획 (고도화 — 사용자 피드백 기반)
+- [ ] Module A: 표준 문서 유형별 전용 뷰 (정책 테이블, 스키마 ERD 등)
+- [ ] 초기 sync_documents 임베딩 부하 완화 (백그라운드 태스크화 or 배치)
+- [ ] 다수 프로젝트 동시 관리 UX 개선
