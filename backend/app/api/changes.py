@@ -108,9 +108,11 @@ def _get_git_log(project_path: str, limit: int) -> list[dict]:
             cwd=project_path,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
-        if result.returncode != 0:
+        if result.returncode != 0 or result.stdout is None:
             return []
 
         entries: list[dict] = []

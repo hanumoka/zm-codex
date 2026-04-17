@@ -110,9 +110,11 @@ def _get_recent_subjects(project_path: str, limit: int) -> list[str]:
             cwd=project_path,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
-        if result.returncode != 0:
+        if result.returncode != 0 or result.stdout is None:
             return []
         return [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
     except (subprocess.TimeoutExpired, FileNotFoundError):

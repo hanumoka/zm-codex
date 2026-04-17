@@ -145,9 +145,11 @@ def _get_commits_with_files(project_path: str, limit: int) -> list[dict[str, str
             cwd=project_path,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
-        if result.returncode != 0:
+        if result.returncode != 0 or result.stdout is None:
             return []
 
         entries: list[dict[str, str | list[str]]] = []
