@@ -94,7 +94,7 @@ function InstanceCard({
         onClick={onToggle}
         className="w-full px-3 py-1.5 text-sm text-zinc-300 flex items-center gap-2"
       >
-        <div className={clsx("w-2 h-2 rounded-full", badge.dot)} />
+        <span className={clsx("w-2 h-2 rounded-full inline-block shrink-0", badge.dot)} />
         <span className="font-medium">{instance.title}</span>
         <span className="text-xs text-zinc-600">@ {instance.current_node ?? "-"}</span>
         <ChevronDown
@@ -171,6 +171,9 @@ function InstanceControls({
           disabled={submitting}
           className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-violet-500/50 disabled:opacity-60"
         >
+          {instance.current_node == null && (
+            <option value="" disabled>— 노드 선택 —</option>
+          )}
           {workflow.nodes.map((n) => (
             <option key={n.id} value={n.id}>
               {n.label} ({n.id})

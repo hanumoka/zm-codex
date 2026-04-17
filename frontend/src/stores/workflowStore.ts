@@ -154,11 +154,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     await api.del(`/v1/workflows/${id}`);
     set((s) => {
       const remaining = s.workflows.filter((w) => w.id !== id);
-      const nextSelected =
-        s.selectedWorkflowId === id
-          ? (remaining[0]?.id ?? null)
-          : s.selectedWorkflowId;
-      return { workflows: remaining, selectedWorkflowId: nextSelected };
+      const wasSelected = s.selectedWorkflowId === id;
+      const nextSelected = wasSelected ? (remaining[0]?.id ?? null) : s.selectedWorkflowId;
+      // Clear instances if the deleted workflow was the active selection —
+      // the [selectedWorkflowId] effect only re-fetches when the new id is
+      // non-null, so without this they'd linger as orphans.
+      return {
+        workflows: remaining,
+        selectedWorkflowId: nextSelected,
+        instances: wasSelected ? [] : s.instances,
+      };
     });
   },
 
