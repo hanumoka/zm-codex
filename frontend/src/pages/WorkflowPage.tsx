@@ -16,6 +16,7 @@ import { api } from "../lib/api/client";
 import { useWorkflowStore, type WorkflowNode, type WorkflowInstance } from "../stores/workflowStore";
 import { WorkflowCreateButton } from "../components/WorkflowCreateButton";
 import { WorkflowEditActions } from "../components/WorkflowEditActions";
+import { InstancePanel } from "../components/InstancePanel";
 import { clsx } from "clsx";
 
 // ── Custom Node Component ──
@@ -324,24 +325,7 @@ export function WorkflowPage() {
       )}
 
       {/* Active Instances */}
-      {instances.length > 0 && (
-        <div className="mb-4 bg-zinc-900/50 border border-zinc-800 rounded-xl p-3">
-          <h3 className="text-xs font-medium text-zinc-500 mb-2">실행 중인 인스턴스</h3>
-          <div className="flex gap-2">
-            {instances.map((inst) => (
-              <div key={inst.id} className="px-3 py-1.5 bg-zinc-800 rounded-lg text-sm text-zinc-300 flex items-center gap-2">
-                <div className={clsx("w-2 h-2 rounded-full",
-                  inst.status === "active" && "bg-emerald-400",
-                  inst.status === "completed" && "bg-zinc-500",
-                  inst.status === "blocked" && "bg-amber-400",
-                )}/>
-                {inst.title}
-                <span className="text-xs text-zinc-600">@ {inst.current_node}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {selectedWorkflow && <InstancePanel workflow={selectedWorkflow} instances={instances} />}
 
       {/* View */}
       {selectedWorkflow ? (

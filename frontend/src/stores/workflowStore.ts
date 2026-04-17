@@ -71,6 +71,11 @@ export interface WorkflowPatchPayload {
   description?: string | null;
 }
 
+export interface InstancePatchPayload {
+  current_node?: string;
+  status?: string;
+}
+
 type ViewMode = "pipeline" | "kanban";
 
 interface WorkflowState {
@@ -88,6 +93,12 @@ interface WorkflowState {
   createWorkflow: (payload: WorkflowCreatePayload) => Promise<Workflow>;
   updateWorkflow: (id: string, patch: WorkflowPatchPayload) => Promise<Workflow>;
   deleteWorkflow: (id: string) => Promise<void>;
+  createInstance: (workflowId: string, title: string) => Promise<WorkflowInstance>;
+  updateInstance: (
+    workflowId: string,
+    instanceId: string,
+    patch: InstancePatchPayload,
+  ) => Promise<WorkflowInstance>;
 }
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -149,5 +160,25 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           : s.selectedWorkflowId;
       return { workflows: remaining, selectedWorkflowId: nextSelected };
     });
+  },
+
+  createInstance: async (workflowId, title) => {
+    const inst = await api.post<WorkflowInstance>(
+      `/v1/workflows/${workflowId}/instances`,
+      { workflow_id: workflowId, title },
+    );
+    set((s) => ({ instances: [inst, ...s.instances] }));
+    return inst;
+  },
+
+  updateInstance: async (workflowId, instanceId, patch) => {
+    const inst = await api.patch<WorkflowInstance>(
+      `/v1/workflows/${workflowId}/instances/${instanceId}`,
+      patch,
+    );
+    set((s) => ({
+      instances: s.instances.map((i) => (i.id === instanceId ? inst : i)),
+    }));
+    return inst;
   },
 }));
