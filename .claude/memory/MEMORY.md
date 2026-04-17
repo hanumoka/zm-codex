@@ -8,13 +8,17 @@
 - 워크플로우: DB 실측 0개 (zm-codex, 2026-04-17) · 번들 템플릿 4종 사용 가능 (bugfix/deployment/development/review) | 인스턴스: 0개
 - 소스 파일: BE 49 Python + FE 19 TS/TSX (ModalShell/WorkflowCreateButton/WorkflowEditActions/InstancePanel + lib/api/errors 추가)
 - 에이전트: 5개 | 규칙: 5개 | 훅: 6+HTTP | 스킬: 3개
-- MCP 도구: 5개 (search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary)
-- 테스트: 통합 테스트 수동 검증 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7), pytest 회귀 12건 (backend/tests/ — 워크플로우 CRUD·템플릿·export/import)
+- MCP 도구: 7개 (search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary, create_workflow_from_template, create_instance)
+- 테스트: 통합 테스트 수동 검증 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7), pytest 회귀 20건 (backend/tests/ — 워크플로우 CRUD·템플릿·export/import·인스턴스 DELETE·MCP 도구)
 
-## 반복 실수 TOP 5 (절대 반복 금지)
+## 반복 실수 TOP (절대 반복 금지)
 1. **Windows 경로 백슬래시** → curl JSON에서 \\ 파싱 에러. Python httpx로 테스트하거나 / 사용
 2. **React peer dependency 충돌** → React 19와 호환 안 되는 라이브러리 사전 확인 필수
 3. **미사용 변수** → tsconfig noUnusedParameters=true로 빌드 실패. map((item, i) → i 안 쓰면 제거
+4. **button 내부 div** → React validateDOMNesting 경고. 상태 dot 등은 `<span inline-block>`으로
+5. **controlled select 값/옵션 미스매치** → nullable state 묶을 때 placeholder `<option value="" disabled>` 필수
+6. **pytest-asyncio loop scope 미지정** → 전역 asyncpg 엔진 cross-loop 충돌. pyproject에 `asyncio_default_fixture_loop_scope`+`asyncio_default_test_loop_scope`=session
+7. **엔드포인트 검증 비대칭** → 같은 리소스의 쓰기 진입로 여럿이면 같은 계약(409/404 등)을 모두 걸기
 
 ## Phase 5 이후 신규 모듈 (Phase 5 / 5b / 6 / 7)
 - **File Watcher** (P5): watchfiles.awatch 기반 비동기 파일 감시, 프로젝트별 독립 태스크, SSE 브로드캐스트
@@ -29,7 +33,7 @@
 - **Template Init** (P6): .claude/ 구조를 템플릿으로 추출 → 다른 프로젝트에 적용
 - **Channel Server** (P6): asyncio.Queue 기반 Web→Claude Code 역방향 메시지 큐 (send/poll/status/history)
 - **Code-Doc Linking** (P7): 커밋↔문서 양방향 자동 링크 (경로 매칭 + 키워드 매칭, confidence 점수)
-- **Workflow Seed** (유지보수): services/seed.py — 번들 .md 템플릿(bugfix/deployment/development/review)을 프로젝트의 .claude/workflows/로 복사 + import_single_workflow_file() 재사용으로 DB 임포트. NULL 바이트 필터, "updated" 경쟁 상황 409 처리. `GET /workflows/templates`, `POST /workflows/from-template`
+- **Workflow Seed** (유지보수): services/seed.py — 번들 .md 템플릿(bugfix/deployment/development/review) 7노드 규모를 프로젝트의 .claude/workflows/로 복사 + import_single_workflow_file() 재사용으로 DB 임포트. NULL 바이트 필터, "updated" 경쟁 상황 409 처리. `GET /workflows/templates`, `POST /workflows/from-template`. FE 생성/리네임/삭제/export/import/인스턴스 UI, 이름 중복 409, 삭제 시 export .md 동반 제거, SSE 양방향(workflow_*/instance_*) 연결 완비. MCP에 create_workflow_from_template, create_instance 2종 추가 (기존 update_step_status는 advance 역할 유지)
 
 ## 핵심 아키텍처 결정
 - **DB 통합**: PostgreSQL + pgvector 단일 DB (ChromaDB + SQLite 대신)

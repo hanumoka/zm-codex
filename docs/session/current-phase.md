@@ -108,3 +108,8 @@
 - [x] FE 다중 인스턴스 하이라이트 UX — store에 highlightedInstanceId, InstancePanel 카드의 Radar 토글로 파이프라인 표시 대상 명시 선택 (2026-04-17)
 - [x] FE 워크플로우 export/import UI — WorkflowEditActions의 Download 모달(+파일 경로), CreateButton 드롭다운의 '파일에서 가져오기' 모달(+ created/updated/skipped 카운트) (2026-04-17)
 - [x] pytest 회귀 테스트 인프라 — backend/tests/ + asyncio session loop, 템플릿/CRUD/중복/traversal/export-import 12건 통과 (2026-04-17)
+- [x] Playwright E2E 3 스펙 추가 — workflow-create/-edit/-instance (2026-04-17)
+- [x] workflows.py E501 + review.md 4→7노드 확장 + delete_workflow의 export .md 동반 제거 (2026-04-17)
+- [x] 인스턴스 DELETE 엔드포인트 + FE 인라인 확인 UI + SSE instance_deleted + pytest (2026-04-17)
+- [x] MCP 워크플로우 도구 2종 — create_workflow_from_template, create_instance (update_step_status는 advance 역할 유지) (2026-04-17)
+- [x] known-mistakes 레지스트리 M-004~M-007 기록, prd/roadmap/quick-ref 동기화, MCP 수치 5→7 · pytest 12→20 갱신 (2026-04-17)

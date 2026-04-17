@@ -31,6 +31,34 @@ paths:
 - **감지 방법**: `build-checker` 에이전트의 `npx tsc --noEmit`에서 조기 발견
 - **발생일**: 2026-04-16 (Phase 2 WorkflowPage 구현)
 
+### M-004 [WARN] HTML `<button>` 안에 `<div>` 중첩
+- **현상**: React 개발 모드에서 `validateDOMNesting` 경고. 브라우저는 자동 복구하지만 접근성 도구 경고 + 브라우저별 파싱 차이 가능
+- **원인**: `<button>`은 phrasing content만 허용하는데 block-level `<div>`를 자식으로 넣음 (상태 dot 렌더링 등)
+- **올바른 접근**: inline 요소 (`<span className="inline-block">`)로 교체, 혹은 button을 `<div role="button">`로 변경
+- **감지 방법**: `npm run dev`로 띄운 뒤 콘솔 warning, 또는 React 19 strict 모드
+- **발생일**: 2026-04-17 (Phase 7 유지보수 InstancePanel 코드 리뷰)
+
+### M-005 [WARN] Controlled `<select>`의 value/option 불일치
+- **현상**: React가 `Warning: <select> received value=X but no <option> with that value`. UI는 첫 option을 표시하지만 실제 상태는 ""
+- **원인**: `instance.current_node`가 nullable인데 `value={instance.current_node ?? ""}`로 묶고, options에는 빈 문자열 값이 없어 미스매치
+- **올바른 접근**: nullable 값이 올 수 있으면 `<option value="" disabled>— 선택 —</option>` placeholder 추가
+- **감지 방법**: 브라우저 콘솔 warning, 또는 초기 렌더 후 사용자가 선택을 바꿨는데 `onChange`가 첫 번째 실제 변경에서만 의도대로 발동하는 현상
+- **발생일**: 2026-04-17 (Phase 7 유지보수 InstancePanel 코드 리뷰)
+
+### M-006 [BLOCK] pytest-asyncio 이벤트 루프 스코프 미지정 → 앱 전역 asyncpg 엔진 충돌
+- **현상**: 테스트 실행 시 "another operation is in progress" 또는 "attached to a different loop" 에러가 아무렇게나 튀어나옴. pytest가 테스트마다 새 event loop를 만드는데 앱의 모듈 수준 asyncpg 엔진은 첫 루프에 바인딩되므로 이후 테스트에서 cross-loop 참조가 일어남
+- **원인**: pytest-asyncio 0.23+ 기본값이 function-scope loop
+- **올바른 접근**: `pyproject.toml [tool.pytest.ini_options]`에 `asyncio_default_fixture_loop_scope = "session"`과 `asyncio_default_test_loop_scope = "session"` 둘 다 지정. 또는 테스트 전용 엔진 교체(NullPool 등)로 루프 바인딩 해소
+- **감지 방법**: `pytest -v` 첫 실행에서 테스트 2~3개 이상이 랜덤하게 실패, fixture의 `async_session()` 또는 ASGI 경유 DB 호출이 시발점
+- **발생일**: 2026-04-17 (Phase 7 유지보수 pytest 인프라 도입)
+
+### M-007 [WARN] API 엔드포인트 검증 대칭성 누락
+- **현상**: 동일 도메인의 여러 진입로(POST A, POST B, PATCH C) 중 일부만 중복/가드를 검증하고 나머지는 통과시킴 → 사용자가 진입로를 바꾸는 것만으로 규칙을 우회
+- **원인**: 변경 A를 추가할 때 관련 진입로를 그리드로 훑지 않음
+- **올바른 접근**: 새 검증이 생기면 같은 리소스의 모든 쓰기 진입점(Create/Update/Import/From-template) 표로 나열하고 각각 같은 계약(409/404 등)을 가지도록 동기화
+- **감지 방법**: 새 UI가 실수로 "A에선 중복 거부되고 B에선 조용히 통과"처럼 보이면 의심
+- **발생일**: 2026-04-17 (워크플로우 이름 중복 검증 — from-template만 409, POST/PATCH는 누수됐음)
+
 <!--
 ## 등록 양식
 
