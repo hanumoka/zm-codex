@@ -9,7 +9,7 @@
 - 소스 파일: BE 49 Python + FE 19 TS/TSX (ModalShell/WorkflowCreateButton/WorkflowEditActions/InstancePanel + lib/api/errors 추가)
 - 에이전트: 5개 | 규칙: 5개 | 훅: 6+HTTP | 스킬: 3개
 - MCP 도구: 5개 (search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary)
-- 테스트: 통합 테스트 수동 검증 완료 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7)
+- 테스트: 통합 테스트 수동 검증 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7), pytest 회귀 12건 (backend/tests/ — 워크플로우 CRUD·템플릿·export/import)
 
 ## 반복 실수 TOP 5 (절대 반복 금지)
 1. **Windows 경로 백슬래시** → curl JSON에서 \\ 파싱 에러. Python httpx로 테스트하거나 / 사용

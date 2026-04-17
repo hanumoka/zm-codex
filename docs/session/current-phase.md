@@ -104,3 +104,7 @@
 - [x] FE 인스턴스 생성/진행 UI — 제목 입력 모달, 상태 4종(active/blocked/completed/cancelled) + 현재 노드 드롭다운 (InstancePanel) (2026-04-17)
 - [x] BE 이름 중복 체크 — POST /workflows, PATCH /workflows/{id} 모두 동일 프로젝트 내 중복 이름 409 (2026-04-17)
 - [x] 워크플로우/인스턴스 SSE 양방향 연결 — delete 브로드캐스트 추가 + FE 구독으로 다른 탭 변이 자동 반영 (2026-04-17)
+- [x] TemplateCreateRequest 스키마 이관 (api/workflows.py → schemas/workflow.py) (2026-04-17)
+- [x] FE 다중 인스턴스 하이라이트 UX — store에 highlightedInstanceId, InstancePanel 카드의 Radar 토글로 파이프라인 표시 대상 명시 선택 (2026-04-17)
+- [x] FE 워크플로우 export/import UI — WorkflowEditActions의 Download 모달(+파일 경로), CreateButton 드롭다운의 '파일에서 가져오기' 모달(+ created/updated/skipped 카운트) (2026-04-17)
+- [x] pytest 회귀 테스트 인프라 — backend/tests/ + asyncio session loop, 템플릿/CRUD/중복/traversal/export-import 12건 통과 (2026-04-17)
