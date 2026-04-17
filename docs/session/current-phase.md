@@ -113,3 +113,5 @@
 - [x] 인스턴스 DELETE 엔드포인트 + FE 인라인 확인 UI + SSE instance_deleted + pytest (2026-04-17)
 - [x] MCP 워크플로우 도구 2종 — create_workflow_from_template, create_instance (update_step_status는 advance 역할 유지) (2026-04-17)
 - [x] known-mistakes 레지스트리 M-004~M-007 기록, prd/roadmap/quick-ref 동기화, MCP 수치 5→7 · pytest 12→20 갱신 (2026-04-17)
+- [x] Ruff 전 파일 49→0 일괄 청소 — 자동 fix 25건(import 정렬·미사용 제거) + 수동 줄바꿈 23건(mcp descriptions·models 컬럼 주석·watcher·config summary) (2026-04-17)
+- [x] 가이드 문서 3건 — backend/tests/README.md, frontend/e2e/README.md, docs/features/workflow-manager.md (2026-04-17)
