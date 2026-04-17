@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Sparkles, PencilLine, Loader2 } from "lucide-react";
+import { Plus, Sparkles, PencilLine, Loader2, Upload } from "lucide-react";
 import { clsx } from "clsx";
 import { useWorkflowStore, type TemplateInfo } from "../stores/workflowStore";
 import { extractApiMessage } from "../lib/api/errors";
 import { ModalShell } from "./ModalShell";
 
-type ModalKind = "template" | "manual" | null;
+type ModalKind = "template" | "manual" | "import" | null;
 
 interface Props {
   projectId: string | null;
@@ -57,6 +57,12 @@ export function WorkflowCreateButton({ projectId }: Props) {
             >
               <PencilLine className="w-4 h-4 text-cyan-400" /> 직접 입력
             </button>
+            <button
+              onClick={() => { setMenuOpen(false); setModal("import"); }}
+              className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 flex items-center gap-2 border-t border-zinc-800"
+            >
+              <Upload className="w-4 h-4 text-emerald-400" /> 파일에서 가져오기
+            </button>
           </div>
         )}
       </div>
@@ -66,6 +72,9 @@ export function WorkflowCreateButton({ projectId }: Props) {
       )}
       {modal === "manual" && projectId && (
         <ManualCreateModal projectId={projectId} onClose={() => setModal(null)} />
+      )}
+      {modal === "import" && projectId && (
+        <ImportModal projectId={projectId} onClose={() => setModal(null)} />
       )}
     </>
   );
@@ -208,6 +217,73 @@ function ManualCreateModal({ projectId, onClose }: { projectId: string; onClose:
         >
           {submitting && <Loader2 className="w-4 h-4 animate-spin" />} 생성
         </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+// ── Import Modal ──
+
+function ImportModal({ projectId, onClose }: { projectId: string; onClose: () => void }) {
+  const { importWorkflows } = useWorkflowStore();
+  const [state, setState] = useState<
+    | { kind: "idle" }
+    | { kind: "loading" }
+    | { kind: "success"; created: number; updated: number; skipped: number }
+    | { kind: "error"; msg: string }
+  >({ kind: "idle" });
+
+  const handleImport = async () => {
+    setState({ kind: "loading" });
+    try {
+      const r = await importWorkflows(projectId);
+      setState({ kind: "success", created: r.created, updated: r.updated, skipped: r.skipped });
+    } catch (e) {
+      setState({ kind: "error", msg: extractApiMessage(e) });
+    }
+  };
+
+  return (
+    <ModalShell title="파일에서 가져오기" onClose={onClose}>
+      <p className="text-sm text-zinc-300">
+        프로젝트의 <code className="mx-1 text-xs text-zinc-400">.claude/workflows/*.md</code>
+        파일을 스캔해 워크플로우로 DB에 동기화합니다.
+      </p>
+      <p className="text-xs text-zinc-500 mt-2">
+        같은 이름이 있으면 노드/엣지/설명을 덮어쓰고, 파싱 실패한 파일은 건너뜁니다.
+      </p>
+
+      {state.kind === "success" && (
+        <div className="mt-4 text-xs bg-emerald-500/10 border border-emerald-500/30 rounded-md p-2 text-emerald-300">
+          생성 {state.created} · 갱신 {state.updated} · 스킵 {state.skipped}
+        </div>
+      )}
+      {state.kind === "error" && (
+        <div className="mt-4 text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-md p-2">
+          {state.msg}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2 mt-5">
+        <button
+          onClick={onClose}
+          className="px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-600"
+        >
+          {state.kind === "success" ? "닫기" : "취소"}
+        </button>
+        {state.kind !== "success" && (
+          <button
+            onClick={handleImport}
+            disabled={state.kind === "loading"}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
+              "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/40",
+              state.kind === "loading" && "opacity-60 cursor-not-allowed",
+            )}
+          >
+            {state.kind === "loading" && <Loader2 className="w-4 h-4 animate-spin" />} 가져오기
+          </button>
+        )}
       </div>
     </ModalShell>
   );

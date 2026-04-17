@@ -76,6 +76,18 @@ export interface InstancePatchPayload {
   status?: string;
 }
 
+export interface ExportResult {
+  status: string;
+  file_path: string;
+}
+
+export interface ImportStats {
+  status: string;
+  created: number;
+  updated: number;
+  skipped: number;
+}
+
 type ViewMode = "pipeline" | "kanban";
 
 interface WorkflowState {
@@ -102,6 +114,8 @@ interface WorkflowState {
     instanceId: string,
     patch: InstancePatchPayload,
   ) => Promise<WorkflowInstance>;
+  exportWorkflow: (id: string) => Promise<ExportResult>;
+  importWorkflows: (projectId: string) => Promise<ImportStats>;
 }
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -198,5 +212,25 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       instances: s.instances.map((i) => (i.id === instanceId ? inst : i)),
     }));
     return inst;
+  },
+
+  exportWorkflow: async (id) => {
+    return await api.post<ExportResult>(`/v1/workflows/${id}/export`, {});
+  },
+
+  importWorkflows: async (projectId) => {
+    const stats = await api.post<ImportStats>(
+      `/v1/workflows/import?project_id=${projectId}`,
+      {},
+    );
+    // Refresh the workflow list so new/updated entries appear without a page reload.
+    const data = await api.get<Workflow[]>(`/v1/workflows?project_id=${projectId}`);
+    set((s) => ({
+      workflows: data,
+      selectedWorkflowId: s.selectedWorkflowId && data.some((w) => w.id === s.selectedWorkflowId)
+        ? s.selectedWorkflowId
+        : (data[0]?.id ?? null),
+    }));
+    return stats;
   },
 }));
