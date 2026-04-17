@@ -32,6 +32,17 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# The app owns a module-level asyncpg engine + connection pool that binds
+# to the first event loop that uses it. To avoid "another operation in
+# progress" / "attached to a different loop" errors, pin both fixtures and
+# tests to a session-wide loop.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
