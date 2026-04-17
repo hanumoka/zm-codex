@@ -6,7 +6,7 @@
 - DB: PostgreSQL + pgvector 9 테이블 (memory_chunks 포함, code_doc_links 포함) | 임베딩: 384d HNSW cosine
 - 등록 프로젝트: 1 (zm-codex) | 스캔 문서: 30개 (12가지 유형)
 - 워크플로우: 2개 (개발 7노드, 버그수정 7노드) | 인스턴스: 1개
-- 소스 파일: BE 48 Python + FE 14 TS/TSX (services/ingest.py 추가)
+- 소스 파일: BE 49 Python + FE 14 TS/TSX (services/seed.py 추가)
 - 에이전트: 5개 | 규칙: 5개 | 훅: 6+HTTP | 스킬: 3개
 - MCP 도구: 5개 (search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary)
 - 테스트: 통합 테스트 수동 검증 완료 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7)
@@ -29,6 +29,7 @@
 - **Template Init** (P6): .claude/ 구조를 템플릿으로 추출 → 다른 프로젝트에 적용
 - **Channel Server** (P6): asyncio.Queue 기반 Web→Claude Code 역방향 메시지 큐 (send/poll/status/history)
 - **Code-Doc Linking** (P7): 커밋↔문서 양방향 자동 링크 (경로 매칭 + 키워드 매칭, confidence 점수)
+- **Workflow Seed** (유지보수): services/seed.py — 번들 .md 템플릿(bugfix/deployment/development/review)을 프로젝트의 .claude/workflows/로 복사 + import_single_workflow_file() 재사용으로 DB 임포트. NULL 바이트 필터, "updated" 경쟁 상황 409 처리. `GET /workflows/templates`, `POST /workflows/from-template`
 
 ## 핵심 아키텍처 결정
 - **DB 통합**: PostgreSQL + pgvector 단일 DB (ChromaDB + SQLite 대신)

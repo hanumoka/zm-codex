@@ -3,6 +3,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,9 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.events import broadcaster
 from app.models.project import Project
-from app.models.workflow import Workflow, WorkflowInstance, StepExecution
-from app.services.workflow_classifier import classify_workflow
-from app.services.workflow_sync import export_workflow, import_workflows
+from app.models.workflow import StepExecution, Workflow, WorkflowInstance
 from app.schemas.workflow import (
     InstanceCreate,
     InstanceOut,
@@ -21,8 +20,56 @@ from app.schemas.workflow import (
     WorkflowOut,
     WorkflowUpdate,
 )
+from app.services.seed import create_from_template, list_builtin_templates
+from app.services.workflow_classifier import classify_workflow
+from app.services.workflow_sync import export_workflow, import_workflows
 
 router = APIRouter(prefix="/api/v1/workflows", tags=["workflows"])
+
+
+class TemplateCreateRequest(BaseModel):
+    project_id: uuid.UUID
+    template_name: str
+
+
+# ── Workflow templates (must be declared BEFORE /{wf_id} to avoid path conflicts) ──
+
+
+@router.get("/templates")
+async def list_templates() -> list[dict[str, str | int]]:
+    """List bundled workflow templates available for seeding."""
+    return list_builtin_templates()
+
+
+@router.post("/from-template", response_model=WorkflowOut, status_code=201)
+async def create_workflow_from_template(
+    body: TemplateCreateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> Workflow:
+    """Create a workflow from a bundled template. Copies the template .md into
+    the project's .claude/workflows/ directory and imports into DB via the
+    canonical pipeline.
+
+    Errors:
+      404 — project or template not found
+      409 — a workflow with the template's name already exists in this project
+    """
+    project = await db.get(Project, body.project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+
+    try:
+        wf = await create_from_template(db, project.id, project.path, body.template_name)
+    except FileNotFoundError as e:
+        raise HTTPException(404, str(e)) from e
+    except ValueError as e:
+        message = str(e)
+        if "already exists" in message:
+            raise HTTPException(409, message) from e
+        raise HTTPException(400, message) from e
+
+    await broadcaster.broadcast("workflow_created", {"id": str(wf.id), "name": wf.name})
+    return wf
 
 
 # ── Workflow auto-detection ──

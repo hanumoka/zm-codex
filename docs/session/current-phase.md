@@ -98,3 +98,4 @@
 - [x] IngestRequest 스키마 정리 — 무시되던 wing/room 필드 제거
 - [x] MCP search_memories 도구 설명에 "pure vector (non-hybrid)" 명시
 - [x] prd.md / roadmap.md / quick-ref.md 전면 동기화
+- [x] 워크플로우 번들 템플릿 시드 API — services/seed.py + GET /workflows/templates + POST /workflows/from-template (번들: bugfix/deployment/development/review, NULL 바이트 가드, "updated" 경쟁 상황 409) (2026-04-17)
