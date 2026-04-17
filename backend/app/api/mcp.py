@@ -16,11 +16,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
+from app.core.events import broadcaster
 from app.models.document import Document
 from app.models.memory import MemoryChunk
 from app.models.project import Project
-from app.models.workflow import Workflow, WorkflowInstance
+from app.models.workflow import StepExecution, Workflow, WorkflowInstance
 from app.services.embedding import embed_single
+from app.services.seed import create_from_template
 from app.services.watcher import watcher_manager
 
 router = APIRouter(prefix="/api/v1/mcp", tags=["mcp"])
@@ -69,15 +71,58 @@ MCP_TOOLS = [
     },
     {
         "name": "update_step_status",
-        "description": "Advance a workflow instance to the next step or update step status.",
+        "description": (
+            "Advance a workflow instance to the next step or update step status. "
+            "Sister tool to create_instance / create_workflow_from_template."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "instance_id": {"type": "string", "description": "Workflow instance UUID"},
                 "node_id": {"type": "string", "description": "Target node ID to move to"},
-                "status": {"type": "string", "description": "New instance status: running, completed, failed"},
+                "status": {
+                    "type": "string",
+                    "description": "Instance status: active, completed, blocked, cancelled",
+                },
             },
             "required": ["instance_id", "node_id"],
+        },
+    },
+    {
+        "name": "create_workflow_from_template",
+        "description": (
+            "Create a workflow in a project from one of the bundled templates "
+            "(bugfix / deployment / development / review). Returns the created "
+            "workflow id or an error if the name already exists."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project_id": {"type": "string", "description": "Project UUID"},
+                "template_name": {
+                    "type": "string",
+                    "description": "One of: bugfix, deployment, development, review",
+                },
+            },
+            "required": ["project_id", "template_name"],
+        },
+    },
+    {
+        "name": "create_instance",
+        "description": (
+            "Start a new workflow execution instance with the given title. "
+            "The start node is picked automatically from the workflow definition."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "workflow_id": {"type": "string", "description": "Workflow UUID"},
+                "title": {
+                    "type": "string",
+                    "description": "Human-readable title for this run",
+                },
+            },
+            "required": ["workflow_id", "title"],
         },
     },
     {
@@ -148,6 +193,10 @@ async def _handle_tool_call(
             result = await _tool_get_workflow_status(arguments, db)
         elif tool_name == "update_step_status":
             result = await _tool_update_step_status(arguments, db)
+        elif tool_name == "create_workflow_from_template":
+            result = await _tool_create_workflow_from_template(arguments, db)
+        elif tool_name == "create_instance":
+            result = await _tool_create_instance(arguments, db)
         elif tool_name == "get_project_summary":
             result = await _tool_get_project_summary(arguments, db)
         else:
@@ -284,6 +333,74 @@ async def _tool_update_step_status(args: dict, db: AsyncSession) -> str:
 
     await db.commit()
     return f"Instance {inst.title} moved to node '{node_id}'. Status: {inst.status}"
+
+
+async def _tool_create_workflow_from_template(args: dict, db: AsyncSession) -> str:
+    """Create a workflow from a bundled template (bugfix/deployment/development/review)."""
+    project_id = uuid.UUID(args["project_id"])
+    template_name = args["template_name"]
+
+    project = await db.get(Project, project_id)
+    if not project:
+        return f"Project not found: {project_id}"
+
+    try:
+        wf = await create_from_template(db, project.id, project.path, template_name)
+    except FileNotFoundError as e:
+        return f"Template not found: {e}"
+    except ValueError as e:
+        return f"Error: {e}"
+
+    await broadcaster.broadcast(
+        "workflow_created", {"id": str(wf.id), "name": wf.name}
+    )
+    return (
+        f"Created workflow '{wf.name}' [{wf.workflow_type}] (id={wf.id}) "
+        f"with {len(wf.nodes)} nodes and {len(wf.edges)} edges."
+    )
+
+
+async def _tool_create_instance(args: dict, db: AsyncSession) -> str:
+    """Create a new workflow execution instance, seeding steps from the start node."""
+    workflow_id = uuid.UUID(args["workflow_id"])
+    title = args["title"]
+
+    wf = await db.get(Workflow, workflow_id)
+    if not wf:
+        return f"Workflow not found: {workflow_id}"
+
+    start_node: str | None = None
+    for node in wf.nodes:
+        if node.get("type") == "start":
+            start_node = node["id"]
+            break
+
+    inst = WorkflowInstance(
+        workflow_id=workflow_id,
+        title=title,
+        current_node=start_node,
+    )
+    db.add(inst)
+    await db.flush()
+
+    for node in wf.nodes:
+        step = StepExecution(
+            instance_id=inst.id,
+            node_id=node["id"],
+            status="running" if node["id"] == start_node else "pending",
+        )
+        db.add(step)
+
+    await db.commit()
+    await db.refresh(inst)
+
+    await broadcaster.broadcast(
+        "instance_created", {"id": str(inst.id), "title": inst.title}
+    )
+    return (
+        f"Started instance '{inst.title}' (id={inst.id}) on workflow "
+        f"'{wf.name}' at node '{start_node or '<none>'}'."
+    )
 
 
 async def _tool_get_project_summary(args: dict, db: AsyncSession) -> str:
