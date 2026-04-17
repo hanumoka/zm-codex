@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Sparkles, PencilLine, X, Loader2 } from "lucide-react";
+import { Plus, Sparkles, PencilLine, Loader2 } from "lucide-react";
 import { clsx } from "clsx";
 import { useWorkflowStore, type TemplateInfo } from "../stores/workflowStore";
+import { extractApiMessage } from "../lib/api/errors";
+import { ModalShell } from "./ModalShell";
 
 type ModalKind = "template" | "manual" | null;
 
@@ -213,31 +215,6 @@ function ManualCreateModal({ projectId, onClose }: { projectId: string; onClose:
 
 // ── Shared building blocks ──
 
-function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onEsc);
-    return () => document.removeEventListener("keydown", onEsc);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 w-full max-w-md shadow-2xl"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function LabeledInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label className="block">
@@ -252,16 +229,3 @@ function LabeledInput({ label, value, onChange, placeholder }: { label: string; 
   );
 }
 
-function extractApiMessage(e: unknown): string {
-  if (!(e instanceof Error)) return "요청 처리 중 오류가 발생했습니다";
-  const match = /API Error (\d+): (.+)/.exec(e.message);
-  if (!match) return e.message;
-  const [, status, body] = match;
-  try {
-    const parsed = JSON.parse(body ?? "") as { detail?: string };
-    if (parsed.detail) return `(${status}) ${parsed.detail}`;
-  } catch {
-    // not JSON
-  }
-  return e.message;
-}

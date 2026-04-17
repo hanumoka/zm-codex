@@ -15,6 +15,7 @@ import { KanbanSquare, GitBranch, Play, Bot, Zap, CircleDot, CheckCircle2, Clock
 import { api } from "../lib/api/client";
 import { useWorkflowStore, type WorkflowNode, type WorkflowInstance } from "../stores/workflowStore";
 import { WorkflowCreateButton } from "../components/WorkflowCreateButton";
+import { WorkflowEditActions } from "../components/WorkflowEditActions";
 import { clsx } from "clsx";
 
 // ── Custom Node Component ──
@@ -295,18 +296,29 @@ export function WorkflowPage() {
 
       {/* Workflow Selector */}
       {workflows.length > 0 && (
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
           {workflows.map((wf) => (
-            <button
+            <div
               key={wf.id}
-              onClick={() => setSelectedWorkflow(wf.id)}
-              className={clsx("px-3 py-1.5 rounded-lg text-sm transition",
-                selectedWorkflowId === wf.id ? "bg-violet-500/20 text-violet-400 border border-violet-500/30" : "bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-700"
+              className={clsx(
+                "group inline-flex items-center rounded-lg text-sm transition border",
+                selectedWorkflowId === wf.id
+                  ? "bg-violet-500/20 text-violet-400 border-violet-500/30"
+                  : "bg-zinc-800 text-zinc-500 hover:text-zinc-300 border-zinc-700"
               )}
             >
-              {wf.name}
-              <span className="ml-2 text-xs text-zinc-600">{wf.nodes.length} nodes</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setSelectedWorkflow(wf.id)}
+                className="px-3 py-1.5 text-left"
+              >
+                {wf.name}
+                <span className="ml-2 text-xs text-zinc-600">{wf.nodes.length} nodes</span>
+              </button>
+              <div className="flex items-center gap-0.5 pr-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                <WorkflowEditActions workflow={wf} />
+              </div>
+            </div>
           ))}
         </div>
       )}
