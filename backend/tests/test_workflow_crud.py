@@ -252,6 +252,46 @@ async def test_import_creates_from_disk_md(
                 pass
 
 
+async def test_delete_instance(
+    client: httpx.AsyncClient, zm_project: Project, tracker: list[str]
+) -> None:
+    pid = str(zm_project.id)
+    node = {"id": "n1", "label": "s", "type": "start", "position": {"x": 0, "y": 0}}
+    name = _pytest_name("-delinst")
+
+    r = await client.post(
+        "/api/v1/workflows",
+        json={
+            "project_id": pid,
+            "name": name,
+            "workflow_type": "custom",
+            "nodes": [node],
+            "edges": [],
+        },
+    )
+    assert r.status_code == 201
+    wf_id = r.json()["id"]
+    tracker.append(wf_id)
+
+    r = await client.post(
+        f"/api/v1/workflows/{wf_id}/instances",
+        json={"workflow_id": wf_id, "title": _pytest_name("-delinst-t")},
+    )
+    assert r.status_code == 201
+    inst_id = r.json()["id"]
+
+    r = await client.delete(f"/api/v1/workflows/{wf_id}/instances/{inst_id}")
+    assert r.status_code == 204
+
+    r = await client.get(f"/api/v1/workflows/{wf_id}/instances")
+    assert r.status_code == 200
+    assert all(i["id"] != inst_id for i in r.json())
+
+    # Second delete → 404
+    r = await client.delete(f"/api/v1/workflows/{wf_id}/instances/{inst_id}")
+    assert r.status_code == 404
+
+
 @pytest.mark.parametrize("bad_id", ["00000000-0000-0000-0000-000000000000"])
 async def test_get_unknown_returns_404(client: httpx.AsyncClient, bad_id: str) -> None:
     r = await client.get(f"/api/v1/workflows/{bad_id}")

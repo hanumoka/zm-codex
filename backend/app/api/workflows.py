@@ -351,3 +351,26 @@ async def update_instance(
         {"id": str(inst.id), "current_node": inst.current_node},
     )
     return inst
+
+
+@router.delete("/{wf_id}/instances/{inst_id}", status_code=204)
+async def delete_instance(
+    wf_id: uuid.UUID,
+    inst_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    result = await db.execute(
+        select(WorkflowInstance).where(
+            WorkflowInstance.id == inst_id,
+            WorkflowInstance.workflow_id == wf_id,
+        )
+    )
+    inst = result.scalar_one_or_none()
+    if not inst:
+        raise HTTPException(404, "Instance not found")
+    await db.delete(inst)
+    await db.commit()
+    await broadcaster.broadcast(
+        "instance_deleted",
+        {"id": str(inst_id), "workflow_id": str(wf_id)},
+    )

@@ -42,6 +42,7 @@ const SSE_EVENT_TYPES = [
   "workflow_deleted",
   "instance_created",
   "instance_updated",
+  "instance_deleted",
 ] as const;
 
 function parseSSE(e: MessageEvent): SSEEvent | null {

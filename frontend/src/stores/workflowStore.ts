@@ -114,6 +114,7 @@ interface WorkflowState {
     instanceId: string,
     patch: InstancePatchPayload,
   ) => Promise<WorkflowInstance>;
+  deleteInstance: (workflowId: string, instanceId: string) => Promise<void>;
   exportWorkflow: (id: string) => Promise<ExportResult>;
   importWorkflows: (projectId: string) => Promise<ImportStats>;
 }
@@ -212,6 +213,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       instances: s.instances.map((i) => (i.id === instanceId ? inst : i)),
     }));
     return inst;
+  },
+
+  deleteInstance: async (workflowId, instanceId) => {
+    await api.del(`/v1/workflows/${workflowId}/instances/${instanceId}`);
+    set((s) => ({
+      instances: s.instances.filter((i) => i.id !== instanceId),
+      highlightedInstanceId:
+        s.highlightedInstanceId === instanceId ? null : s.highlightedInstanceId,
+    }));
   },
 
   exportWorkflow: async (id) => {

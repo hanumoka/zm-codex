@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2, Ban, Radar } from "lucide-react";
+import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2, Ban, Radar, Trash2 } from "lucide-react";
 import { clsx } from "clsx";
 import {
   useWorkflowStore,
@@ -153,9 +153,10 @@ function InstanceControls({
   workflow: Workflow;
   instance: WorkflowInstance;
 }) {
-  const { updateInstance } = useWorkflowStore();
+  const { updateInstance, deleteInstance } = useWorkflowStore();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const patch = async (body: { status?: string; current_node?: string }) => {
     setSubmitting(true);
@@ -218,6 +219,49 @@ function InstanceControls({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="pt-1 border-t border-zinc-800/60 flex items-center justify-end gap-2">
+        {confirmDelete ? (
+          <>
+            <span className="text-[11px] text-zinc-500">이 인스턴스를 삭제할까요?</span>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              disabled={submitting}
+              className="px-2 py-0.5 text-[11px] text-zinc-400 hover:text-zinc-200"
+            >
+              취소
+            </button>
+            <button
+              onClick={async () => {
+                setSubmitting(true);
+                setError(null);
+                try {
+                  await deleteInstance(workflow.id, instance.id);
+                  // Note: no onClose needed — the card itself disappears from
+                  // the parent list when `instances` state drops it.
+                } catch (e) {
+                  setError(extractApiMessage(e));
+                  setSubmitting(false);
+                  setConfirmDelete(false);
+                }
+              }}
+              disabled={submitting}
+              className="px-2 py-0.5 text-[11px] text-red-300 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded-md flex items-center gap-1"
+            >
+              {submitting && <Loader2 className="w-3 h-3 animate-spin" />} 확정
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            disabled={submitting}
+            title="이 인스턴스 삭제"
+            className="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800/50 transition disabled:opacity-50"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -226,7 +226,7 @@ export function WorkflowPage() {
       const t = evt.type;
       if (t === "workflow_created" || t === "workflow_updated" || t === "workflow_deleted") {
         void fetchWorkflows(projectId);
-      } else if (t === "instance_created" || t === "instance_updated") {
+      } else if (t === "instance_created" || t === "instance_updated" || t === "instance_deleted") {
         const current = useWorkflowStore.getState().selectedWorkflowId;
         if (current) void fetchInstances(current);
       }
