@@ -168,5 +168,5 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>
 ---
 
 *프로젝트: zm-codex (Claude Code 종합 관리 시스템)*
-*상태: **Phase 7 완료 — 핵심 모듈(A~G) 구현 완료. Module A 표준 문서 전용 뷰는 deferred***
+*상태: **Phase 7 + 유지보수 완료 — 핵심 모듈(A~G) 구현 + 워크플로우 관리자 전면 완성(번들 템플릿 시드, FE CRUD/인스턴스/export·import/하이라이트, SSE 양방향, MCP 7도구, pytest 20건). Module A 표준 문서 전용 뷰는 deferred***
 *작업 모드: Claude 자율 개발 + 사용자 리뷰*

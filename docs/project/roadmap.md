@@ -38,7 +38,7 @@
 - [x] sync 서비스 추출 (services/sync.py)
 - [x] 파일 감시 + 자동 인덱싱 (watchfiles.awatch)
 - [x] 드리프트 감지 (services/drift.py, GET /watcher/drift)
-- [x] MCP 서버 (JSON-RPC 2.0 Streamable HTTP, 5개 도구)
+- [x] MCP 서버 (JSON-RPC 2.0 Streamable HTTP, 5개 도구 / 2026-04-17 유지보수에서 7개로 확장)
 - [x] FE Watcher 페이지 + SSE 이벤트 확장
 
 ## Phase 5b: 워크플로우 자동화 + 설정 이력 — 완료

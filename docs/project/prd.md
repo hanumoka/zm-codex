@@ -66,7 +66,7 @@ Claude Code로 개발하는 모든 프로젝트에서 발생하는 문서/설정
 
 ### Module G: MCP/Channel Server (Claude Code 통합) — Phase 5 + 6 완료
 - [x] MCP 서버 (JSON-RPC 2.0 Streamable HTTP) — POST /api/v1/mcp
-- [x] MCP 도구 5종: search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary
+- [x] MCP 도구 7종: search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary, create_workflow_from_template, create_instance (마지막 2종 Phase 7 유지보수에서 추가)
 - [x] Channel 서버 (asyncio.Queue 기반 Web→Claude Code 역방향 큐) — Phase 6
 - [x] Channel API: POST send, GET poll, GET status, GET history
 - [x] HTTP Hook Receiver — Phase 1 (POST /api/hooks/events)

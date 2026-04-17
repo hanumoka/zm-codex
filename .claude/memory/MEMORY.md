@@ -1,12 +1,12 @@
 # zm-codex Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-04-17 (Phase 7 완료 — 핵심 모듈 A~G 구현, Module A 전용 뷰 deferred)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-04-17 (Phase 7 + 유지보수 완료 — 핵심 모듈 A~G 구현 + 워크플로우 관리자 전면 완성, Module A 전용 뷰 deferred)
 
 ## 프로젝트 수치 (항상 최신 유지)
 - BE: FastAPI **11 라우터** | FE: React 8 페이지 + 1 레이아웃
 - DB: PostgreSQL + pgvector 9 테이블 (memory_chunks 포함, code_doc_links 포함) | 임베딩: 384d HNSW cosine
 - 등록 프로젝트: 1 (zm-codex) | 스캔 문서: 30개 (12가지 유형)
 - 워크플로우: DB 실측 0개 (zm-codex, 2026-04-17) · 번들 템플릿 4종 사용 가능 (bugfix/deployment/development/review) | 인스턴스: 0개
-- 소스 파일: BE 49 Python + FE 19 TS/TSX (ModalShell/WorkflowCreateButton/WorkflowEditActions/InstancePanel + lib/api/errors 추가)
+- 소스 파일: BE 49 Python (app/) + 5 pytest 파일 (tests/) | FE 19 TS/TSX (src/) + 26 Playwright 스펙 (e2e/)
 - 에이전트: 5개 | 규칙: 5개 | 훅: 6+HTTP | 스킬: 3개
 - MCP 도구: 7개 (search_memories, list_documents, get_workflow_status, update_step_status, get_project_summary, create_workflow_from_template, create_instance)
 - 테스트: 통합 테스트 수동 검증 (Phase 1, 2), 빌드 검증 통과 (Phase 5~7), pytest 회귀 20건 (backend/tests/ — 워크플로우 CRUD·템플릿·export/import·인스턴스 DELETE·MCP 도구)
