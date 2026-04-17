@@ -33,7 +33,7 @@ SERVER_INFO = {
 MCP_TOOLS = [
     {
         "name": "search_memories",
-        "description": "Search project documentation using semantic vector search. Returns relevant text chunks ranked by similarity.",
+        "description": "Search project documentation using pure vector cosine similarity (no BM25 re-ranking; use GET /api/v1/memories/search for hybrid BM25+vector). Returns relevant text chunks ranked by similarity.",
         "inputSchema": {
             "type": "object",
             "properties": {

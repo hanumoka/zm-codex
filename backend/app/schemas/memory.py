@@ -6,8 +6,6 @@ from pydantic import BaseModel
 
 class IngestRequest(BaseModel):
     project_id: uuid.UUID
-    wing: str | None = None  # defaults to project name
-    room: str | None = None  # auto-detected from path
 
 
 class SearchRequest(BaseModel):

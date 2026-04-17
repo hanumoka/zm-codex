@@ -10,13 +10,11 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.events import broadcaster
 from app.models.memory import MemoryChunk
-from app.models.document import Document
 from app.models.project import Project
 from app.schemas.memory import IngestRequest, IngestResult, MemoryChunkOut, SearchResult
 from app.services.bm25_search import build_bm25_index, normalize_scores, score_bm25
-from app.services.chunker import chunk_text
-from app.services.embedding import embed_single, embed_texts
-from app.services.scanner import detect_doc_type
+from app.services.embedding import embed_single
+from app.services.ingest import ingest_project_documents
 
 router = APIRouter(prefix="/api/v1/memories", tags=["memories"])
 
@@ -31,75 +29,17 @@ async def ingest_project(
     if not project:
         raise HTTPException(404, "Project not found")
 
-    wing = body.wing or project.name
-
-    # Get all documents for this project
-    result = await db.execute(
-        select(Document).where(
-            Document.project_id == body.project_id,
-            Document.content.isnot(None),
-        )
-    )
-    docs = list(result.scalars().all())
-
-    total_chunks = 0
-    files_processed = 0
-
-    for doc in docs:
-        if not doc.content or len(doc.content.strip()) < settings.min_chunk_size:
-            continue
-
-        room = body.room or _detect_room(doc.file_path)
-        chunks = chunk_text(doc.content, doc.file_path)
-
-        if not chunks:
-            continue
-
-        # Generate embeddings in batch
-        texts = [c["content"] for c in chunks]
-        embeddings = embed_texts(texts)
-
-        # Delete existing chunks for this source file
-        existing = await db.execute(
-            select(MemoryChunk.id).where(
-                MemoryChunk.project_id == body.project_id,
-                MemoryChunk.source_file == doc.file_path,
-            )
-        )
-        existing_ids = [row[0] for row in existing.all()]
-        if existing_ids:
-            await db.execute(
-                MemoryChunk.__table__.delete().where(MemoryChunk.id.in_(existing_ids))
-            )
-
-        # Insert new chunks
-        for chunk_data, embedding in zip(chunks, embeddings):
-            chunk = MemoryChunk(
-                project_id=body.project_id,
-                wing=wing,
-                room=room,
-                content=chunk_data["content"],
-                embedding=embedding,
-                source_file=doc.file_path,
-                chunk_index=chunk_data["chunk_index"],
-                source_mtime=doc.last_modified.timestamp() if doc.last_modified else None,
-            )
-            db.add(chunk)
-            total_chunks += 1
-
-        files_processed += 1
-
-    await db.commit()
+    stats = await ingest_project_documents(db, project)
 
     await broadcaster.broadcast("ingest_complete", {
         "project_id": str(body.project_id),
-        "chunks": total_chunks,
-        "files": files_processed,
+        "chunks": stats["chunks_created"],
+        "files": stats["files_processed"],
     })
 
     return IngestResult(
-        chunks_created=total_chunks,
-        files_processed=files_processed,
+        chunks_created=stats["chunks_created"],
+        files_processed=stats["files_processed"],
         project_id=body.project_id,
     )
 
@@ -199,12 +139,3 @@ async def memory_status(
     }
 
 
-def _detect_room(file_path: str) -> str:
-    """Detect room name from file path."""
-    doc_type = detect_doc_type(file_path)
-    if doc_type:
-        return doc_type
-    parts = file_path.replace("\\", "/").split("/")
-    if len(parts) >= 2:
-        return parts[-2]
-    return "general"
