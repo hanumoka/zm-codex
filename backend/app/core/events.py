@@ -10,11 +10,11 @@ class EventBroadcaster:
     """Simple in-memory SSE broadcaster. Clients subscribe and receive events."""
 
     def __init__(self) -> None:
-        self._subscribers: list[asyncio.Queue[str]] = []
+        self._subscribers: list[asyncio.Queue[dict]] = []
 
-    async def subscribe(self) -> AsyncGenerator[str, None]:
-        """Subscribe to the event stream. Yields SSE-formatted strings."""
-        queue: asyncio.Queue[str] = asyncio.Queue(maxsize=100)
+    async def subscribe(self) -> AsyncGenerator[dict, None]:
+        """Subscribe to the event stream. Yields dicts that sse_starlette formats as SSE frames."""
+        queue: asyncio.Queue[dict] = asyncio.Queue(maxsize=100)
         self._subscribers.append(queue)
         try:
             while True:
@@ -30,9 +30,10 @@ class EventBroadcaster:
             "data": data,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        message = f"event: {event_type}\ndata: {json.dumps(payload, default=str)}\n\n"
+        # sse_starlette formats a dict with keys {event, data} into proper SSE frames.
+        message = {"event": event_type, "data": json.dumps(payload, default=str)}
 
-        dead_queues: list[asyncio.Queue[str]] = []
+        dead_queues: list[asyncio.Queue[dict]] = []
         for queue in list(self._subscribers):  # copy to avoid mutation during iteration
             try:
                 queue.put_nowait(message)
