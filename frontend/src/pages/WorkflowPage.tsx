@@ -75,9 +75,7 @@ const nodeTypes = { workflowNode: WorkflowNodeComponent };
 
 // ── Pipeline View ──
 
-function PipelineView({ workflow, instances }: { workflow: typeof useWorkflowStore extends never ? never : ReturnType<typeof useWorkflowStore.getState>["workflows"][0]; instances: WorkflowInstance[] }) {
-  const activeInstance = instances.find((i) => i.status === "active");
-
+function PipelineView({ workflow, activeInstance }: { workflow: typeof useWorkflowStore extends never ? never : ReturnType<typeof useWorkflowStore.getState>["workflows"][0]; activeInstance: WorkflowInstance | undefined }) {
   const nodes: Node[] = workflow.nodes.map((n) => {
     const stepStatus = activeInstance?.steps.find((s) => s.node_id === n.id)?.status;
     return {
@@ -192,7 +190,7 @@ interface AutoDetectResult {
 }
 
 export function WorkflowPage() {
-  const { workflows, selectedWorkflowId, instances, viewMode, setViewMode, setSelectedWorkflow, fetchWorkflows, fetchInstances } = useWorkflowStore();
+  const { workflows, selectedWorkflowId, instances, highlightedInstanceId, viewMode, setViewMode, setSelectedWorkflow, fetchWorkflows, fetchInstances } = useWorkflowStore();
   const [loading, setLoading] = useState(true);
   const [autoDetect, setAutoDetect] = useState<AutoDetectResult | null>(null);
   const [detecting, setDetecting] = useState(false);
@@ -253,6 +251,9 @@ export function WorkflowPage() {
   };
 
   const selectedWorkflow = workflows.find((w) => w.id === selectedWorkflowId);
+  const activeInstance =
+    instances.find((i) => i.id === highlightedInstanceId) ??
+    instances.find((i) => i.status === "active");
 
   if (loading) {
     return <div className="p-6 text-zinc-500">워크플로우 로딩 중...</div>;
@@ -345,7 +346,7 @@ export function WorkflowPage() {
       {/* View */}
       {selectedWorkflow ? (
         viewMode === "pipeline" ? (
-          <PipelineView workflow={selectedWorkflow} instances={instances} />
+          <PipelineView workflow={selectedWorkflow} activeInstance={activeInstance} />
         ) : (
           <KanbanView workflow={selectedWorkflow} instances={instances} />
         )

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2, Ban } from "lucide-react";
+import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2, Ban, Radar } from "lucide-react";
 import { clsx } from "clsx";
 import {
   useWorkflowStore,
@@ -15,8 +15,15 @@ interface Props {
 }
 
 export function InstancePanel({ workflow, instances }: Props) {
+  const { highlightedInstanceId, setHighlightedInstance } = useWorkflowStore();
   const [creating, setCreating] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Effective highlight: explicit pick, or first active fallback.
+  const effectiveHighlightId =
+    (highlightedInstanceId && instances.some((i) => i.id === highlightedInstanceId)
+      ? highlightedInstanceId
+      : instances.find((i) => i.status === "active")?.id) ?? null;
 
   return (
     <div className="mb-4 bg-zinc-900/50 border border-zinc-800 rounded-xl p-3">
@@ -42,8 +49,13 @@ export function InstancePanel({ workflow, instances }: Props) {
               workflow={workflow}
               instance={inst}
               expanded={expandedId === inst.id}
+              highlighted={effectiveHighlightId === inst.id}
+              isExplicitHighlight={highlightedInstanceId === inst.id}
               onToggle={() =>
                 setExpandedId((id) => (id === inst.id ? null : inst.id))
+              }
+              onToggleHighlight={() =>
+                setHighlightedInstance(highlightedInstanceId === inst.id ? null : inst.id)
               }
             />
           ))}
@@ -73,12 +85,18 @@ function InstanceCard({
   workflow,
   instance,
   expanded,
+  highlighted,
+  isExplicitHighlight,
   onToggle,
+  onToggleHighlight,
 }: {
   workflow: Workflow;
   instance: WorkflowInstance;
   expanded: boolean;
+  highlighted: boolean;
+  isExplicitHighlight: boolean;
   onToggle: () => void;
+  onToggleHighlight: () => void;
 }) {
   const badge = STATUS_BADGE[instance.status] ?? STATUS_BADGE.active!;
 
@@ -88,23 +106,41 @@ function InstanceCard({
         "rounded-lg border transition",
         expanded
           ? "bg-zinc-900 border-zinc-700 w-full"
-          : "bg-zinc-800 border-zinc-800 hover:border-zinc-700",
+          : "bg-zinc-800 hover:border-zinc-700",
+        highlighted ? "border-violet-500/50 ring-1 ring-violet-500/20" : "border-zinc-800",
       )}
     >
-      <button
-        onClick={onToggle}
-        className="w-full px-3 py-1.5 text-sm text-zinc-300 flex items-center gap-2"
-      >
-        <span className={clsx("w-2 h-2 rounded-full inline-block shrink-0", badge.dot)} />
-        <span className="font-medium">{instance.title}</span>
-        <span className="text-xs text-zinc-600">@ {instance.current_node ?? "-"}</span>
-        <ChevronDown
+      <div className="flex items-center">
+        <button
+          onClick={onToggle}
+          className="flex-1 min-w-0 px-3 py-1.5 text-sm text-zinc-300 flex items-center gap-2 text-left"
+        >
+          <span className={clsx("w-2 h-2 rounded-full inline-block shrink-0", badge.dot)} />
+          <span className="font-medium truncate">{instance.title}</span>
+          <span className="text-xs text-zinc-600 shrink-0">@ {instance.current_node ?? "-"}</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleHighlight(); }}
+          title={isExplicitHighlight ? "파이프라인 하이라이트 해제" : "파이프라인에 표시"}
           className={clsx(
-            "w-3 h-3 text-zinc-500 ml-auto transition-transform",
-            expanded && "rotate-180",
+            "p-1.5 transition shrink-0",
+            isExplicitHighlight ? "text-violet-300" : highlighted ? "text-violet-500/60" : "text-zinc-600 hover:text-zinc-400",
           )}
-        />
-      </button>
+        >
+          <Radar className="w-3.5 h-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          title={expanded ? "접기" : "펼치기"}
+          className="p-1.5 pr-2 text-zinc-500 hover:text-zinc-300 shrink-0"
+        >
+          <ChevronDown
+            className={clsx("w-3.5 h-3.5 transition-transform", expanded && "rotate-180")}
+          />
+        </button>
+      </div>
       {expanded && <InstanceControls workflow={workflow} instance={instance} />}
     </div>
   );

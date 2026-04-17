@@ -82,10 +82,13 @@ interface WorkflowState {
   workflows: Workflow[];
   selectedWorkflowId: string | null;
   instances: WorkflowInstance[];
+  /** Instance whose progress drives pipeline/kanban highlight. Null → auto-pick first active. */
+  highlightedInstanceId: string | null;
   viewMode: ViewMode;
 
   setViewMode: (mode: ViewMode) => void;
   setSelectedWorkflow: (id: string | null) => void;
+  setHighlightedInstance: (id: string | null) => void;
   fetchWorkflows: (projectId: string) => Promise<void>;
   fetchInstances: (workflowId: string) => Promise<void>;
   listTemplates: () => Promise<TemplateInfo[]>;
@@ -105,10 +108,12 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   workflows: [],
   selectedWorkflowId: null,
   instances: [],
+  highlightedInstanceId: null,
   viewMode: "pipeline",
 
   setViewMode: (mode) => set({ viewMode: mode }),
-  setSelectedWorkflow: (id) => set({ selectedWorkflowId: id }),
+  setSelectedWorkflow: (id) => set({ selectedWorkflowId: id, highlightedInstanceId: null }),
+  setHighlightedInstance: (id) => set({ highlightedInstanceId: id }),
 
   fetchWorkflows: async (projectId) => {
     const data = await api.get<Workflow[]>(`/v1/workflows?project_id=${projectId}`);
@@ -120,7 +125,14 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   fetchInstances: async (workflowId) => {
     const data = await api.get<WorkflowInstance[]>(`/v1/workflows/${workflowId}/instances`);
-    set({ instances: data });
+    set((s) => ({
+      instances: data,
+      // Drop highlight if the selected instance is no longer in the new list.
+      highlightedInstanceId:
+        s.highlightedInstanceId && data.some((i) => i.id === s.highlightedInstanceId)
+          ? s.highlightedInstanceId
+          : null,
+    }));
   },
 
   listTemplates: async () => {
@@ -163,6 +175,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         workflows: remaining,
         selectedWorkflowId: nextSelected,
         instances: wasSelected ? [] : s.instances,
+        highlightedInstanceId: wasSelected ? null : s.highlightedInstanceId,
       };
     });
   },
