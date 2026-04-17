@@ -164,10 +164,11 @@ async def test_instance_create_and_advance(
     assert steps_by_id["n1"]["status"] == "completed"
 
 
-async def test_export_import_round_trip(
+async def test_export_creates_file_and_delete_removes_it(
     client: httpx.AsyncClient, zm_project: Project, tracker: list[str]
 ) -> None:
     pid = str(zm_project.id)
+    node = {"id": "n1", "label": "s", "type": "start", "position": {"x": 0, "y": 0}}
     name = _pytest_name("-export")
 
     r = await client.post(
@@ -176,7 +177,7 @@ async def test_export_import_round_trip(
             "project_id": pid,
             "name": name,
             "workflow_type": "custom",
-            "nodes": [{"id": "n1", "label": "s", "type": "start", "position": {"x": 0, "y": 0}}],
+            "nodes": [node],
             "edges": [],
         },
     )
@@ -186,27 +187,65 @@ async def test_export_import_round_trip(
 
     r = await client.post(f"/api/v1/workflows/{wf_id}/export", json={})
     assert r.status_code == 200, detail(r)
-    file_path = r.json()["file_path"]
+    file_path = Path(r.json()["file_path"])
+    assert file_path.is_file()
+
+    # Delete row → should also remove the export companion file
+    r = await client.delete(f"/api/v1/workflows/{wf_id}")
+    assert r.status_code == 204
+    assert not file_path.is_file(), "delete_workflow should remove .claude/workflows/<slug>.md"
+
+
+async def test_import_creates_from_disk_md(
+    client: httpx.AsyncClient, zm_project: Project, tracker: list[str]
+) -> None:
+    """Export→read back→delete (also deletes file)→rewrite file→import → created."""
+    pid = str(zm_project.id)
+    node = {"id": "n1", "label": "s", "type": "start", "position": {"x": 0, "y": 0}}
+    name = _pytest_name("-imp")
+
+    r = await client.post(
+        "/api/v1/workflows",
+        json={
+            "project_id": pid,
+            "name": name,
+            "workflow_type": "custom",
+            "nodes": [node],
+            "edges": [],
+        },
+    )
+    assert r.status_code == 201
+    wf_id = r.json()["id"]
+    tracker.append(wf_id)
+
+    r = await client.post(f"/api/v1/workflows/{wf_id}/export", json={})
+    assert r.status_code == 200
+    file_path = Path(r.json()["file_path"])
+    md_content = file_path.read_text(encoding="utf-8")
+
+    # Delete row + file
+    r = await client.delete(f"/api/v1/workflows/{wf_id}")
+    assert r.status_code == 204
+    assert not file_path.is_file()
+
+    # Re-stage the file on disk, then import
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(md_content, encoding="utf-8")
 
     try:
-        # Delete row; file stays on disk
-        r = await client.delete(f"/api/v1/workflows/{wf_id}")
-        assert r.status_code == 204
-
-        # Import → recreate
         r = await client.post(f"/api/v1/workflows/import?project_id={pid}", json={})
         assert r.status_code == 200
         stats = r.json()
         assert stats["created"] + stats["updated"] >= 1
 
-        # Recapture the freshly-created row for cleanup
+        # Recapture the re-created row for tracker cleanup
         r = await client.get(f"/api/v1/workflows?project_id={pid}")
         for wf in r.json():
             if wf["name"] == name:
                 tracker.append(wf["id"])
                 break
     finally:
-        if Path(file_path).is_file():
+        if file_path.is_file():
             try:
                 os.remove(file_path)
             except OSError:

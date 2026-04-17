@@ -126,6 +126,12 @@ def parse_workflow_md(content: str, file_name: str) -> dict | None:
     }
 
 
+def workflow_file_path(project_path: str, workflow_name: str) -> Path:
+    """Compute the on-disk .md path that export_workflow would use for a given name."""
+    safe_name = re.sub(r"[^\w\-]", "_", workflow_name.lower())
+    return Path(project_path) / WORKFLOW_DIR / f"{safe_name}.md"
+
+
 async def export_workflow(
     db: AsyncSession,
     workflow_id: uuid.UUID,
@@ -141,8 +147,7 @@ async def export_workflow(
     wf_dir = Path(project_path) / WORKFLOW_DIR
     wf_dir.mkdir(parents=True, exist_ok=True)
 
-    safe_name = re.sub(r"[^\w\-]", "_", wf.name.lower())
-    file_path = wf_dir / f"{safe_name}.md"
+    file_path = workflow_file_path(project_path, wf.name)
     file_path.write_text(md_content, encoding="utf-8")
 
     return str(file_path)

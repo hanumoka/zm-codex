@@ -1,6 +1,7 @@
 """Workflow CRUD and instance management API."""
 
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -22,7 +23,12 @@ from app.schemas.workflow import (
 )
 from app.services.seed import create_from_template, list_builtin_templates
 from app.services.workflow_classifier import classify_workflow
-from app.services.workflow_sync import export_workflow, import_workflows
+from app.services.workflow_sync import (
+    WORKFLOW_DIR,
+    export_workflow,
+    import_workflows,
+    workflow_file_path,
+)
 
 router = APIRouter(prefix="/api/v1/workflows", tags=["workflows"])
 
@@ -220,8 +226,27 @@ async def delete_workflow(wf_id: uuid.UUID, db: AsyncSession = Depends(get_db)) 
     if not wf:
         raise HTTPException(404, "Workflow not found")
     wf_name = wf.name
+
+    # Capture the matching export file path while we still have project_id + name.
+    project = await db.get(Project, wf.project_id)
+    export_path = workflow_file_path(project.path, wf_name) if project else None
+
     await db.delete(wf)
     await db.commit()
+
+    # Best-effort: remove the on-disk .md companion so a subsequent Import
+    # doesn't silently resurrect the workflow. Safety: the path is derived
+    # via workflow_file_path() which slugs the name into WORKFLOW_DIR, and
+    # we double-check containment before unlinking.
+    if export_path is not None and project is not None and export_path.is_file():
+        try:
+            wf_dir = (Path(project.path) / WORKFLOW_DIR).resolve()
+            resolved = export_path.resolve()
+            if resolved.is_relative_to(wf_dir):
+                resolved.unlink(missing_ok=True)
+        except OSError:
+            pass  # file system hiccup — not fatal for the API contract
+
     await broadcaster.broadcast("workflow_deleted", {"id": str(wf_id), "name": wf_name})
 
 
@@ -321,5 +346,8 @@ async def update_instance(
 
     await db.commit()
     await db.refresh(inst)
-    await broadcaster.broadcast("instance_updated", {"id": str(inst.id), "current_node": inst.current_node})
+    await broadcaster.broadcast(
+        "instance_updated",
+        {"id": str(inst.id), "current_node": inst.current_node},
+    )
     return inst
