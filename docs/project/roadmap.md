@@ -59,6 +59,15 @@
 - [x] Changes 타임라인에 linked_documents 필드 확장
 - [x] FE DocumentsPage 관련 커밋 섹션 + ChangesPage 문서 배지
 
+## Phase 7 유지보수: 워크플로우 관리자 완성 — 완료 (2026-04-17)
+- [x] 번들 템플릿 시드 API (bugfix/deployment/development/review, 경쟁 상황 409, NULL byte 가드)
+- [x] FE 생성/리네임/삭제/인스턴스 생성·진행/cancelled/export/import UI
+- [x] 다중 인스턴스 파이프라인 하이라이트 선택 (Radar 토글)
+- [x] 이름 중복 체크 (create + rename) + SSE 양방향(workflow_*/instance_*) 연결
+- [x] 삭제 시 export .md 동반 제거 (재Import 부활 방지)
+- [x] pytest 회귀 13건 (backend/tests/ — CRUD·템플릿·중복·export/import)
+- [x] Playwright 신규 E2E 3 스펙 (workflow-create/-edit/-instance)
+
 ## 이후 계획 (고도화 — 사용자 피드백 기반)
 - [ ] Module A: 표준 문서 유형별 전용 뷰 (정책 테이블, 스키마 ERD 등)
 - [ ] 초기 sync_documents 임베딩 부하 완화 (백그라운드 태스크화 or 배치)

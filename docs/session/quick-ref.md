@@ -5,7 +5,7 @@
 - **이름**: zm-codex
 - **목적**: Claude Code 전용 종합 관리 시스템
 - **스택**: FastAPI (BE) + Vite/React (FE) + PostgreSQL/pgvector (DB)
-- **상태**: Phase 7 완료 — 핵심 모듈(A~G) 구현 완료. 고도화 대기.
+- **상태**: Phase 7 + 유지보수 완료 — 핵심 모듈(A~G) + 워크플로우 관리자 전면 완성(BE/FE 양방향, 번들 템플릿·CRUD·export/import·SSE 동기화·pytest 13건).
 
 ## 포트
 - BE: 30100 | FE: 30200 | DB: 30432

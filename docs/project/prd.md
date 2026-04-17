@@ -16,7 +16,7 @@ Claude Code로 개발하는 모든 프로젝트에서 발생하는 문서/설정
 - [x] 코드-문서 양방향 링크 배지 (Phase 7)
 - [ ] 표준 문서 유형별 전용 뷰 (정책 테이블, 스키마 ERD 등) — **deferred** (Mock 존재, 고도화 과제)
 
-### Module B: Workflow Manager (워크플로우 관리자) — Phase 2 + 5b 완료
+### Module B: Workflow Manager (워크플로우 관리자) — Phase 2 + 5b + 7 유지보수 완료
 - [x] 워크플로우 CRUD API — POST/GET/PATCH/DELETE /api/v1/workflows
 - [x] 인스턴스 관리 API — POST/GET/PATCH /api/v1/workflows/:id/instances
 - [x] @xyflow/react 노드 파이프라인 에디터 (n8n 스타일)
@@ -25,6 +25,14 @@ Claude Code로 개발하는 모든 프로젝트에서 발생하는 문서/설정
 - [x] 스킬/에이전트 매핑 (각 노드에 Claude Code 스킬/에이전트 연결)
 - [x] 워크플로우 자동 판단 (커밋 패턴 기반) — Phase 5b (services/workflow_classifier.py)
 - [x] .claude/workflows/*.md 양방향 파일 동기화 — Phase 5b (services/workflow_sync.py)
+- [x] 번들 템플릿 시드 — services/seed.py + 4종 .md(bugfix/deployment/development/review 7노드)
+  + GET /workflows/templates + POST /workflows/from-template (Phase 7 유지보수)
+- [x] 이름 중복 체크 — POST /workflows, PATCH /{id}의 동일 프로젝트 내 이름 409 (Phase 7 유지보수)
+- [x] 삭제 시 export .md 동반 제거 — 경로 가드 + 재Import 부활 방지 (Phase 7 유지보수)
+- [x] FE UI 완성 — WorkflowCreateButton(템플릿 픽커/수동/가져오기), WorkflowEditActions(내보내기/리네임/삭제),
+  InstancePanel(생성 + status 4-way + current_node 드롭다운 + Radar 하이라이트 토글) (Phase 7 유지보수)
+- [x] SSE 양방향 연결 — workflow_created/updated/deleted, instance_created/updated 브로드캐스트 +
+  WorkflowPage 구독으로 다른 탭 변이 자동 반영 (Phase 7 유지보수)
 
 ### Module C: Memory Engine (메모리 엔진) — Phase 3 + 6 완료
 - [x] 문서 청킹 (800자, 100자 오버랩, paragraph 경계 분할)
@@ -76,6 +84,7 @@ Claude Code로 개발하는 모든 프로젝트에서 발생하는 문서/설정
 | Phase 5b | 워크플로우 자동판단/양방향 동기화, 설정 변경 이력 | **완료** |
 | Phase 6 | BM25 하이브리드, 템플릿, Channel 서버 | **완료** |
 | Phase 7 | 문서 뷰어 확장 + 코드-문서 양방향 링크 | **완료** |
+| Phase 7 유지보수 | 워크플로우 번들 템플릿 시드 + FE CRUD/인스턴스/하이라이트/export·import/SSE + pytest 13건 | **완료** |
 
 ## 4. 핵심 모듈 구현 완료. 추가 고도화(Module A 표준 뷰 등)는 사용자 피드백 기반으로 진행.
 
@@ -86,3 +95,4 @@ Claude Code로 개발하는 모든 프로젝트에서 발생하는 문서/설정
 | 2026-04-16 | PRD 초기 작성 |
 | 2026-04-16 | Phase 0~4 완료 상태 반영, 모듈별 체크리스트 갱신 |
 | 2026-04-17 | Phase 5/5b/6/7 완료 상태 반영, 미구현으로 남아있던 항목 실제 구현 경로와 대조하여 일괄 갱신 |
+| 2026-04-17 | Module B 워크플로우 관리자 Phase 7 유지보수 — 번들 템플릿 시드, FE CRUD/인스턴스/export·import UI, 중복 체크, SSE 연결, pytest 13건 반영 |
