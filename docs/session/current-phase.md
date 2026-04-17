@@ -99,3 +99,8 @@
 - [x] MCP search_memories 도구 설명에 "pure vector (non-hybrid)" 명시
 - [x] prd.md / roadmap.md / quick-ref.md 전면 동기화
 - [x] 워크플로우 번들 템플릿 시드 API — services/seed.py + GET /workflows/templates + POST /workflows/from-template (번들: bugfix/deployment/development/review, NULL 바이트 가드, "updated" 경쟁 상황 409) (2026-04-17)
+- [x] FE 워크플로우 생성 UI — 템플릿 픽커 + 수동 입력 모달 (WorkflowCreateButton, ModalShell, lib/api/errors) (2026-04-17)
+- [x] FE 워크플로우 이름 수정/삭제 UI — hover 시 노출되는 연필/휴지통 액션, 리네임·삭제 확인 모달 (WorkflowEditActions) (2026-04-17)
+- [x] FE 인스턴스 생성/진행 UI — 제목 입력 모달, 상태 4종(active/blocked/completed/cancelled) + 현재 노드 드롭다운 (InstancePanel) (2026-04-17)
+- [x] BE 이름 중복 체크 — POST /workflows, PATCH /workflows/{id} 모두 동일 프로젝트 내 중복 이름 409 (2026-04-17)
+- [x] 워크플로우/인스턴스 SSE 양방향 연결 — delete 브로드캐스트 추가 + FE 구독으로 다른 탭 변이 자동 반영 (2026-04-17)
