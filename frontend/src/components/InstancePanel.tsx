@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2 } from "lucide-react";
+import { Plus, ChevronDown, Loader2, Play, Pause, CheckCircle2, Ban } from "lucide-react";
 import { clsx } from "clsx";
 import {
   useWorkflowStore,
@@ -66,6 +66,7 @@ const STATUS_BADGE: Record<string, { color: string; dot: string; label: string }
   active: { color: "bg-emerald-400", dot: "bg-emerald-400", label: "진행 중" },
   blocked: { color: "bg-amber-400", dot: "bg-amber-400", label: "차단" },
   completed: { color: "bg-zinc-500", dot: "bg-zinc-500", label: "완료" },
+  cancelled: { color: "bg-red-400", dot: "bg-red-400", label: "취소" },
 };
 
 function InstanceCard({
@@ -132,7 +133,7 @@ function InstanceControls({
     }
   };
 
-  const statusBtn = (key: "active" | "blocked" | "completed", Icon: typeof Play, color: string) => (
+  const statusBtn = (key: "active" | "blocked" | "completed" | "cancelled", Icon: typeof Play, color: string) => (
     <button
       onClick={() => patch({ status: key })}
       disabled={submitting || instance.status === key}
@@ -159,6 +160,7 @@ function InstanceControls({
           {statusBtn("active", Play, "bg-emerald-500/15 text-emerald-300")}
           {statusBtn("blocked", Pause, "bg-amber-500/15 text-amber-300")}
           {statusBtn("completed", CheckCircle2, "bg-zinc-500/15 text-zinc-300")}
+          {statusBtn("cancelled", Ban, "bg-red-500/15 text-red-300")}
           {submitting && <Loader2 className="w-3 h-3 animate-spin text-zinc-500 ml-1" />}
         </div>
       </div>

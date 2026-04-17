@@ -151,6 +151,17 @@ async def create_workflow(
     body: WorkflowCreate,
     db: AsyncSession = Depends(get_db),
 ) -> Workflow:
+    # Duplicate name guard — matches the /from-template behavior so that
+    # manual + template creation paths present the same 409 contract.
+    dup = await db.execute(
+        select(Workflow).where(
+            Workflow.project_id == body.project_id,
+            Workflow.name == body.name,
+        )
+    )
+    if dup.scalar_one_or_none():
+        raise HTTPException(409, f"Workflow already exists with name '{body.name}'")
+
     wf = Workflow(
         project_id=body.project_id,
         name=body.name,
@@ -184,7 +195,16 @@ async def update_workflow(
     if not wf:
         raise HTTPException(404, "Workflow not found")
 
-    if body.name is not None:
+    if body.name is not None and body.name != wf.name:
+        dup = await db.execute(
+            select(Workflow).where(
+                Workflow.project_id == wf.project_id,
+                Workflow.name == body.name,
+                Workflow.id != wf.id,
+            )
+        )
+        if dup.scalar_one_or_none():
+            raise HTTPException(409, f"Workflow already exists with name '{body.name}'")
         wf.name = body.name
     if body.description is not None:
         wf.description = body.description
