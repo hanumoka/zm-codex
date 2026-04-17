@@ -2,12 +2,11 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, func, distinct
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.models.project import Project
 from app.models.document import Document
 from app.models.hook_event import HookEvent
 from app.models.memory import MemoryChunk
@@ -29,7 +28,6 @@ async def get_stats(
             q = q.where(f)
         return (await db.execute(q)).scalar() or 0
 
-    filters = []
     if project_id:
         filters_doc = [Document.project_id == project_id]
         filters_mem = [MemoryChunk.project_id == project_id]

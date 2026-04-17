@@ -5,7 +5,6 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 # Document type detection based on path and filename patterns
 DOC_TYPE_PATTERNS: dict[str, list[str]] = {
     "memory": ["memory/", "MEMORY.md"],

@@ -3,16 +3,16 @@
 import uuid
 from pathlib import Path
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document
 from app.models.project import Project
 from app.services.ingest import delete_chunks_for_file, ingest_document, ingest_project_documents
 from app.services.scanner import (
-    scan_directory,
     SCANNABLE_EXTENSIONS,
     read_file_info,
+    scan_directory,
 )
 
 

@@ -3,7 +3,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -36,7 +36,12 @@ async def compare_config(
     return {
         "project_a": {"id": str(pa.id), "name": pa.name, "path": pa.path},
         "project_b": {"id": str(pb.id), "name": pb.name, "path": pb.path},
-        "summary": {"same": same, "different": different, "missing": missing, "total": len(results)},
+        "summary": {
+            "same": same,
+            "different": different,
+            "missing": missing,
+            "total": len(results),
+        },
         "comparisons": results,
     }
 

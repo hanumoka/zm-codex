@@ -1,20 +1,20 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.changes import router as changes_router
+from app.api.channel import router as channel_router
+from app.api.config import router as config_router
+from app.api.dashboard import router as dashboard_router
 from app.api.hooks import router as hooks_router
+from app.api.mcp import router as mcp_router
+from app.api.memories import router as memories_router
 from app.api.projects import router as projects_router
 from app.api.stream import router as stream_router
-from app.api.workflows import router as workflows_router
-from app.api.memories import router as memories_router
-from app.api.config import router as config_router
-from app.api.changes import router as changes_router
-from app.api.dashboard import router as dashboard_router
 from app.api.watcher import router as watcher_router
-from app.api.mcp import router as mcp_router
-from app.api.channel import router as channel_router
+from app.api.workflows import router as workflows_router
 from app.core.database import init_db
 from app.services.watcher import watcher_manager
 

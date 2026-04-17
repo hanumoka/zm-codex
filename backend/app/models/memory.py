@@ -2,20 +2,24 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import String, Text, Integer, Float, DateTime, ForeignKey, Index, func
+from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.database import Base
 from app.core.config import settings
+from app.core.database import Base
 
 
 class MemoryChunk(Base):
     """벡터 임베딩이 포함된 메모리 청크. MemPalace의 Drawer에 해당."""
     __tablename__ = "memory_chunks"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"))
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE")
+    )
     wing: Mapped[str] = mapped_column(String(128), nullable=False)
     room: Mapped[str] = mapped_column(String(128), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)

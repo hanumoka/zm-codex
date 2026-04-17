@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,7 +20,8 @@ class ConfigChange(Base):
         UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     file_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    change_type: Mapped[str] = mapped_column(String(16), nullable=False)  # created, modified, deleted
+    # created, modified, deleted
+    change_type: Mapped[str] = mapped_column(String(16), nullable=False)
     old_hash: Mapped[str | None] = mapped_column(String(64))
     new_hash: Mapped[str | None] = mapped_column(String(64))
     detected_at: Mapped[datetime] = mapped_column(

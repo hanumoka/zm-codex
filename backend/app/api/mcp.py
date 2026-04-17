@@ -11,7 +11,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -35,13 +35,24 @@ SERVER_INFO = {
 MCP_TOOLS = [
     {
         "name": "search_memories",
-        "description": "Search project documentation using pure vector cosine similarity (no BM25 re-ranking; use GET /api/v1/memories/search for hybrid BM25+vector). Returns relevant text chunks ranked by similarity.",
+        "description": (
+            "Search project documentation using pure vector cosine similarity "
+            "(no BM25 re-ranking; use GET /api/v1/memories/search for hybrid "
+            "BM25+vector). Returns relevant text chunks ranked by similarity."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "query": {"type": "string", "description": "Search query text"},
-                "project_id": {"type": "string", "description": "Project UUID (optional)"},
-                "limit": {"type": "integer", "description": "Max results (default 10)", "default": 10},
+                "project_id": {
+                    "type": "string",
+                    "description": "Project UUID (optional)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results (default 10)",
+                    "default": 10,
+                },
             },
             "required": ["query"],
         },
@@ -53,7 +64,13 @@ MCP_TOOLS = [
             "type": "object",
             "properties": {
                 "project_id": {"type": "string", "description": "Project UUID"},
-                "doc_type": {"type": "string", "description": "Filter by type: memory, policy, rule, agent, skill, hook, prd, roadmap, session, feature, archive, config"},
+                "doc_type": {
+                    "type": "string",
+                    "description": (
+                        "Filter by type: memory, policy, rule, agent, skill, hook, "
+                        "prd, roadmap, session, feature, archive, config"
+                    ),
+                },
             },
             "required": ["project_id"],
         },
@@ -64,8 +81,14 @@ MCP_TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "project_id": {"type": "string", "description": "Project UUID (optional, lists all if omitted)"},
-                "workflow_id": {"type": "string", "description": "Specific workflow UUID (optional)"},
+                "project_id": {
+                    "type": "string",
+                    "description": "Project UUID (optional, lists all if omitted)",
+                },
+                "workflow_id": {
+                    "type": "string",
+                    "description": "Specific workflow UUID (optional)",
+                },
             },
         },
     },
@@ -127,7 +150,10 @@ MCP_TOOLS = [
     },
     {
         "name": "get_project_summary",
-        "description": "Get a quick summary of a project: document counts, memory stats, watcher status.",
+        "description": (
+            "Get a quick summary of a project: document counts, "
+            "memory stats, watcher status."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -301,7 +327,10 @@ async def _tool_get_workflow_status(args: dict, db: AsyncSession) -> str:
         for inst in instances:
             completed = sum(1 for s in inst.steps if s.status == "completed")
             total = len(inst.steps)
-            lines.append(f"  Instance: {inst.title} [{inst.status}] — {completed}/{total} steps @ {inst.current_node}")
+            lines.append(
+                f"  Instance: {inst.title} [{inst.status}] — "
+                f"{completed}/{total} steps @ {inst.current_node}"
+            )
 
     return "\n".join(lines)
 

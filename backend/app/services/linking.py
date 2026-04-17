@@ -5,7 +5,7 @@ import subprocess
 import uuid
 from pathlib import Path
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.code_doc_link import CodeDocLink

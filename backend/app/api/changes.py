@@ -2,18 +2,16 @@
 
 import subprocess
 import uuid
-from datetime import datetime, timezone
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.code_doc_link import CodeDocLink
-from app.models.project import Project
 from app.models.document import Document
 from app.models.hook_event import HookEvent
+from app.models.project import Project
 
 router = APIRouter(prefix="/api/v1/changes", tags=["changes"])
 

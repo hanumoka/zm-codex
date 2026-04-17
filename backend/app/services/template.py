@@ -1,6 +1,5 @@
 """Template service — generate and apply .claude/ config templates."""
 
-import os
 from pathlib import Path
 
 from app.services.config_compare import COMPARE_TARGETS

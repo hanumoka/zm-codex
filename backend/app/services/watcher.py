@@ -183,7 +183,9 @@ class FileWatcherManager:
             for change, path in changes:
                 rel = Path(path)
                 try:
-                    rel_str = str(rel.resolve().relative_to(Path(project_path).resolve())).replace("\\", "/")
+                    rel_str = str(
+                        rel.resolve().relative_to(Path(project_path).resolve())
+                    ).replace("\\", "/")
                 except ValueError:
                     continue
                 if rel_str.startswith(".claude/"):
