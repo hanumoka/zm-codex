@@ -3,6 +3,7 @@ import { Shield, AlertTriangle, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../lib/api/client";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface DocContentResponse {
   id: string;
@@ -13,6 +14,7 @@ interface DocContentResponse {
 }
 
 export function PoliciesPage() {
+  usePageTour("policies");
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ export function PoliciesPage() {
       </div>
 
       {/* Info */}
-      <div className="mb-6 bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+      <div className="mb-6 bg-zinc-900/50 border border-zinc-800 rounded-xl p-4" data-tour="policies-info">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="w-4 h-4 text-green-400" />
           <span className="font-medium text-green-400 text-sm">정책 레지스트리 (policy-registry.md)</span>
@@ -61,7 +63,7 @@ export function PoliciesPage() {
             <div className="text-amber-400 font-medium mb-1">충돌 감지</div>
             새 작업 접수 시 기존 정책과 자동 교차 검증
           </div>
-          <div className="bg-zinc-900 rounded-lg p-3">
+          <div className="bg-zinc-900 rounded-lg p-3" data-tour="policies-critical">
             <div className="text-red-400 font-medium mb-1">CRITICAL 정책 강제</div>
             BLOCK 수준 정책은 mistake-guard.sh 훅에서 자동 차단
           </div>
@@ -70,7 +72,7 @@ export function PoliciesPage() {
 
       {/* Policy Content */}
       {content ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6" data-tour="policies-content">
           <div className="markdown-body text-zinc-300">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           </div>

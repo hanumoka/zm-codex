@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Sparkles, FileText, Clock, ArrowUpDown, Database, Loader2 } from "lucide-react";
 import { api } from "../lib/api/client";
 import { clsx } from "clsx";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface MemoryResult {
   id: string;
@@ -29,6 +30,7 @@ interface MemoryStatus {
 }
 
 export function MemoryPage() {
+  usePageTour("memory");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MemoryResult[]>([]);
   const [searched, setSearched] = useState(false);
@@ -95,13 +97,14 @@ export function MemoryPage() {
 
       {/* Status Bar */}
       {status && (
-        <div className="mb-4 flex items-center gap-4 text-xs text-zinc-500">
+        <div className="mb-4 flex items-center gap-4 text-xs text-zinc-500" data-tour="memory-status">
           <span className="flex items-center gap-1"><Database className="w-3 h-3" /> {status.total_chunks} 청크</span>
           <span>{status.embedding_model} ({status.embedding_dim}d)</span>
           <span>청크 크기: {status.chunk_size}자</span>
           <button
             onClick={handleIngest}
             disabled={ingesting}
+            data-tour="memory-ingest"
             className="ml-auto px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-400 transition flex items-center gap-1"
           >
             {ingesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
@@ -111,7 +114,7 @@ export function MemoryPage() {
       )}
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-6" data-tour="memory-search">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -135,7 +138,7 @@ export function MemoryPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3 mt-3">
+        <div className="flex items-center gap-3 mt-3" data-tour="memory-wing-filter">
           <span className="text-xs text-zinc-500">Wing:</span>
           {wings.map((w) => (
             <button
@@ -201,7 +204,7 @@ export function MemoryPage() {
       )}
 
       {/* How it works */}
-      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
+      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-xl p-5" data-tour="memory-how-it-works">
         <h3 className="text-sm font-medium text-zinc-300 mb-3">Memory Engine 작동 방식 (MemPalace 참조)</h3>
         <div className="grid grid-cols-4 gap-4 text-xs text-zinc-500">
           <div className="bg-zinc-900 rounded-lg p-3">

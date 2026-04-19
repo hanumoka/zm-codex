@@ -5,8 +5,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.changes import router as changes_router
+from app.api.fs import router as fs_router
 from app.api.channel import router as channel_router
 from app.api.config import router as config_router
+from app.api.dev import router as dev_router
 from app.api.dashboard import router as dashboard_router
 from app.api.hooks import router as hooks_router
 from app.api.mcp import router as mcp_router
@@ -48,11 +50,13 @@ app.include_router(stream_router)
 app.include_router(workflows_router)
 app.include_router(memories_router)
 app.include_router(config_router)
+app.include_router(dev_router)
 app.include_router(changes_router)
 app.include_router(dashboard_router)
 app.include_router(watcher_router)
 app.include_router(mcp_router)
 app.include_router(channel_router)
+app.include_router(fs_router)
 
 
 @app.get("/api/v1/health")

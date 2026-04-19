@@ -70,6 +70,31 @@ async def get_project(
     return project
 
 
+@router.delete("/{project_id}", status_code=204)
+async def delete_project(
+    project_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Delete a project and all related data (CASCADE)."""
+    project = await db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    # Stop watcher if running
+    from app.services.watcher import watcher_manager
+
+    await watcher_manager.stop(project_id)
+
+    project_name = project.name
+    await db.delete(project)
+    await db.commit()
+
+    await broadcaster.broadcast("project_deleted", {
+        "id": str(project_id),
+        "name": project_name,
+    })
+
+
 @router.post("/{project_id}/sync")
 async def sync_project(
     project_id: uuid.UUID,

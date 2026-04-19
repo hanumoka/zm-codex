@@ -31,6 +31,7 @@ export const api = {
 const SSE_EVENT_TYPES = [
   "hook_event",
   "project_created",
+  "project_deleted",
   "file_changed",
   "drift_detected",
   "watcher_started",

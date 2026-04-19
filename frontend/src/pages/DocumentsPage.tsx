@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../lib/api/client";
 import { clsx } from "clsx";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface ApiDocument {
   id: string;
@@ -142,6 +143,7 @@ function TreeNodeComponent({ node, depth, selected, onSelect }: { node: TreeNode
 }
 
 export function DocumentsPage() {
+  usePageTour("documents");
   const [tree, setTree] = useState<TreeNode[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [content, setContent] = useState<DocContentResponse | null>(null);
@@ -187,8 +189,8 @@ export function DocumentsPage() {
   return (
     <div className="flex h-full">
       {/* File Tree */}
-      <div className="w-72 border-r border-zinc-800 overflow-y-auto py-2 shrink-0">
-        <div className="px-4 py-2 mb-1">
+      <div className="w-72 border-r border-zinc-800 overflow-y-auto py-2 shrink-0" data-tour="doc-tree">
+        <div className="px-4 py-2 mb-1" data-tour="doc-type-badges">
           <h2 className="text-sm font-semibold text-zinc-300">Document Explorer</h2>
           <p className="text-xs text-zinc-600">{tree.length > 0 ? "실제 프로젝트 문서" : "프로젝트를 등록하세요"}</p>
         </div>
@@ -198,7 +200,7 @@ export function DocumentsPage() {
       </div>
 
       {/* Document Viewer */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" data-tour="doc-viewer">
         {loadingContent ? (
           <div className="flex items-center justify-center h-full text-zinc-500"><Loader2 className="w-5 h-5 animate-spin" /></div>
         ) : content ? (
@@ -229,7 +231,7 @@ export function DocumentsPage() {
 
             {/* Related Commits */}
             {docLinks.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-zinc-800">
+              <div className="mt-6 pt-4 border-t border-zinc-800" data-tour="doc-links">
                 <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
                   <Link2 className="w-4 h-4 text-violet-400" /> 관련 커밋 ({docLinks.length})
                 </h3>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { FileText, KanbanSquare, Shield, AlertTriangle, Bot, Zap, Radio, Database, GitBranch } from "lucide-react";
 import { api, subscribeSSE, type SSEEvent } from "../lib/api/client";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface DashboardStats {
   documents: number;
@@ -46,7 +47,7 @@ function LiveEventFeed() {
   }, [handleEvent]);
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5" data-tour="live-feed">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-zinc-300 flex items-center gap-2">
           <Radio className="w-4 h-4 text-emerald-400" />
@@ -82,6 +83,7 @@ function LiveEventFeed() {
 }
 
 export function DashboardPage() {
+  usePageTour("dashboard");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [projectName, setProjectName] = useState("");
 
@@ -100,7 +102,7 @@ export function DashboardPage() {
 
   return (
     <div className="p-6 max-w-7xl">
-      <div className="mb-6">
+      <div className="mb-6" data-tour="dashboard-header">
         <h1 className="text-2xl font-bold text-zinc-100">Dashboard</h1>
         <p className="text-sm text-zinc-500 mt-1">
           {projectName ? <>프로젝트 <span className="text-violet-400 font-medium">{projectName}</span>의 전체 현황</> : "프로젝트를 등록하세요"}
@@ -110,7 +112,7 @@ export function DashboardPage() {
       {/* Stats Grid */}
       {stats && (
         <>
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-4 mb-6" data-tour="stat-cards">
             <StatCard icon={FileText} label="문서" value={stats.documents} sub={`${Object.keys(stats.doc_types).length}가지 유형`} color="#8b5cf6" />
             <StatCard icon={Database} label="메모리 청크" value={stats.memories} sub="pgvector 시맨틱 검색" color="#06b6d4" />
             <StatCard icon={GitBranch} label="워크플로우" value={stats.workflows} sub={`인스턴스 ${stats.instances}개`} color="#22c55e" />
@@ -124,7 +126,7 @@ export function DashboardPage() {
           </div>
 
           {/* Document Type Breakdown */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6" data-tour="doc-type-breakdown">
             <h3 className="text-sm font-medium text-zinc-300 mb-3">문서 유형 분포</h3>
             <div className="flex flex-wrap gap-2">
               {Object.entries(stats.doc_types).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
@@ -139,7 +141,7 @@ export function DashboardPage() {
       )}
 
       {!stats && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-600 mb-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-600 mb-6" data-tour="stat-cards">
           <Database className="w-10 h-10 mx-auto mb-3 text-zinc-700" />
           <p>프로젝트를 등록하면 통계가 표시됩니다</p>
           <p className="text-xs mt-1">POST /api/v1/projects 로 프로젝트를 등록하세요</p>

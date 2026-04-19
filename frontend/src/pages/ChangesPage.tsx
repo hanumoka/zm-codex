@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GitCommitHorizontal, FileText, AlertTriangle, Zap, Loader2, Link2 } from "lucide-react";
 import { api } from "../lib/api/client";
 import { clsx } from "clsx";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface ChangeEntry {
   type: string;
@@ -33,6 +34,7 @@ const typeConfig: Record<string, { icon: typeof GitCommitHorizontal; color: stri
 const fallbackConfig = { icon: AlertTriangle, color: "text-zinc-400", bg: "bg-zinc-500", label: "OTHER" };
 
 export function ChangesPage() {
+  usePageTour("changes");
   const [changes, setChanges] = useState<ChangeEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectName, setProjectName] = useState("");
@@ -60,7 +62,7 @@ export function ChangesPage() {
 
   return (
     <div className="p-6 max-w-4xl">
-      <div className="mb-6">
+      <div className="mb-6" data-tour="changes-header">
         <h1 className="text-2xl font-bold text-zinc-100">Change Tracker</h1>
         <p className="text-sm text-zinc-500 mt-1">
           {projectName ? `${projectName} — ` : ""}커밋 + 문서 변경 + 훅 이벤트 통합 타임라인
@@ -83,7 +85,7 @@ export function ChangesPage() {
             const date = new Date(change.timestamp);
 
             return (
-              <div key={`${change.timestamp}-${i}`} className="relative flex gap-4 pb-6">
+              <div key={`${change.timestamp}-${i}`} className="relative flex gap-4 pb-6" data-tour={i === 0 ? "changes-timeline" : undefined}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 border-2 border-zinc-950 bg-zinc-900">
                   <Icon className={clsx("w-4 h-4", config.color)} />
                 </div>
@@ -114,7 +116,7 @@ export function ChangesPage() {
                     </div>
                   )}
                   {change.linked_documents && change.linked_documents.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
+                    <div className="mt-2 flex flex-wrap gap-1" data-tour={i === 0 ? "changes-linked-docs" : undefined}>
                       <Link2 className="w-3 h-3 text-violet-400" />
                       {change.linked_documents.slice(0, 3).map((doc) => (
                         <span key={doc} className="text-[10px] text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded truncate max-w-[200px]">{doc}</span>

@@ -1,5 +1,5 @@
-# 현재 상태: Phase 7 완료 — 핵심 모듈(A~G) 구현 완료
-> 최종 업데이트: 2026-04-17
+# 현재 상태: Phase 7 완료 + UX 고도화 — 핵심 모듈(A~G) 구현 + 온보딩/탐색기/프로젝트 삭제
+> 최종 업데이트: 2026-04-19
 
 ## Phase 0 완료 (프로젝트 초기화)
 - [x] 프로젝트 구조 설계 + 기술 스택 확정 (2026-04-16)
@@ -115,3 +115,15 @@
 - [x] known-mistakes 레지스트리 M-004~M-007 기록, prd/roadmap/quick-ref 동기화, MCP 수치 5→7 · pytest 12→20 갱신 (2026-04-17)
 - [x] Ruff 전 파일 49→0 일괄 청소 — 자동 fix 25건(import 정렬·미사용 제거) + 수동 줄바꿈 23건(mcp descriptions·models 컬럼 주석·watcher·config summary) (2026-04-17)
 - [x] 가이드 문서 3건 — backend/tests/README.md, frontend/e2e/README.md, docs/features/workflow-manager.md (2026-04-17)
+
+## UX 고도화 (2026-04-19)
+- [x] 온보딩 투어 시스템 — driver.js 기반 2단계 투어 (메인 온보딩 + 페이지별 상세 투어 8페이지) (2026-04-19)
+  - lib/tour.ts, lib/pageTours.ts, hooks/useTour.ts, hooks/usePageTour.ts, stores/tourStore.ts
+  - 8개 페이지 전체에 data-tour 앵커 32개 추가
+  - Zustand + localStorage 상태 관리, 첫 방문 자동 실행, 재실행 버튼
+- [x] 디렉토리 탐색기 — GET /api/v1/fs/browse API + FE DirectoryBrowser 컴포넌트 (2026-04-19)
+  - backend/app/api/fs.py (Windows 드라이브 목록, 디렉토리 탐색, path traversal 방지)
+  - 프로젝트 등록 모달에 인라인 탐색기 (breadcrumb + 폴더 목록 + 이름 자동 채우기)
+- [x] 프로젝트 삭제 — DELETE /api/v1/projects/{id} + FE 삭제 UI (2026-04-19)
+  - CASCADE 삭제 (documents, memory_chunks, workflows 등 자동 정리) + watcher stop
+  - 프로젝트 셀렉�� hover 삭제 버튼 + 확인 다이얼로그 + SSE project_deleted 이벤트

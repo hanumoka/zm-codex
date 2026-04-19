@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageTour } from "../hooks/usePageTour";
 import {
   ReactFlow,
   Background,
@@ -99,7 +100,7 @@ function PipelineView({ workflow, activeInstance }: { workflow: typeof useWorkfl
   }));
 
   return (
-    <div className="h-[calc(100vh-220px)] bg-zinc-950 rounded-xl border border-zinc-800">
+    <div className="h-[calc(100vh-220px)] bg-zinc-950 rounded-xl border border-zinc-800" data-tour="wf-canvas">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -190,6 +191,7 @@ interface AutoDetectResult {
 }
 
 export function WorkflowPage() {
+  usePageTour("workflows");
   const { workflows, selectedWorkflowId, instances, highlightedInstanceId, viewMode, setViewMode, setSelectedWorkflow, fetchWorkflows, fetchInstances } = useWorkflowStore();
   const [loading, setLoading] = useState(true);
   const [autoDetect, setAutoDetect] = useState<AutoDetectResult | null>(null);
@@ -267,10 +269,11 @@ export function WorkflowPage() {
           <p className="text-sm text-zinc-500 mt-1">워크플로우를 정의하고, 실행 상태를 모니터링합니다</p>
         </div>
         <div className="flex items-center gap-2">
-          <WorkflowCreateButton projectId={projectId} />
+          <span data-tour="wf-create"><WorkflowCreateButton projectId={projectId} /></span>
           <button
             onClick={handleAutoDetect}
             disabled={detecting || !projectId}
+            data-tour="wf-auto-detect"
             className={clsx(
               "px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
               "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20",
@@ -279,22 +282,24 @@ export function WorkflowPage() {
           >
             <Sparkles className="w-4 h-4" /> {detecting ? "분석 중..." : "자동 감지"}
           </button>
-          <button
-            onClick={() => setViewMode("pipeline")}
-            className={clsx("px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
-              viewMode === "pipeline" ? "bg-violet-500/20 text-violet-400" : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
-            )}
-          >
-            <GitBranch className="w-4 h-4" /> 파이프라인
-          </button>
-          <button
-            onClick={() => setViewMode("kanban")}
-            className={clsx("px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
-              viewMode === "kanban" ? "bg-violet-500/20 text-violet-400" : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
-            )}
-          >
-            <KanbanSquare className="w-4 h-4" /> 칸반
-          </button>
+          <div className="flex items-center gap-2" data-tour="wf-view-toggle">
+            <button
+              onClick={() => setViewMode("pipeline")}
+              className={clsx("px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
+                viewMode === "pipeline" ? "bg-violet-500/20 text-violet-400" : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+              )}
+            >
+              <GitBranch className="w-4 h-4" /> 파이프라인
+            </button>
+            <button
+              onClick={() => setViewMode("kanban")}
+              className={clsx("px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition",
+                viewMode === "kanban" ? "bg-violet-500/20 text-violet-400" : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+              )}
+            >
+              <KanbanSquare className="w-4 h-4" /> 칸반
+            </button>
+          </div>
         </div>
       </div>
 
@@ -313,7 +318,7 @@ export function WorkflowPage() {
 
       {/* Workflow Selector */}
       {workflows.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 mb-4 flex-wrap" data-tour="wf-selector">
           {workflows.map((wf) => (
             <div
               key={wf.id}

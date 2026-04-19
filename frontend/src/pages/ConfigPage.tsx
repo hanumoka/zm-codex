@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FileText, Loader2, FolderOpen, History, FilePlus2, FileEdit, FileX2, Copy } from "lucide-react";
 import { api } from "../lib/api/client";
 import { clsx } from "clsx";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface ConfigChangeEntry {
   id: string;
@@ -20,6 +21,7 @@ interface ApiDocument {
 }
 
 export function ConfigPage() {
+  usePageTour("config");
   const [docs, setDocs] = useState<ApiDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectName, setProjectName] = useState("");
@@ -96,6 +98,7 @@ export function ConfigPage() {
             finally { setGenerating(false); }
           }}
           disabled={generating || !projectId}
+          data-tour="config-template"
           className={clsx(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
             "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20",
@@ -122,7 +125,7 @@ export function ConfigPage() {
       )}
 
       {/* Summary */}
-      <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+      <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-xl p-4" data-tour="config-summary">
         <div className="flex items-center gap-4 mb-3">
           <FolderOpen className="w-5 h-5 text-violet-400" />
           <span className="font-medium text-zinc-200">.claude/ 디렉토리</span>
@@ -153,7 +156,7 @@ export function ConfigPage() {
 
       {/* Config Change History */}
       {configHistory.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" data-tour="config-history">
           <h3 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
             <History className="w-4 h-4 text-cyan-400" /> 설정 변경 이력
           </h3>
@@ -178,6 +181,7 @@ export function ConfigPage() {
       )}
 
       {/* File List by Type */}
+      <div data-tour="config-file-list">
       {Object.entries(grouped).sort((a, b) => {
         const order = ["agent", "rule", "mistakes", "hook", "skill", "memory", "policy", "config"];
         return order.indexOf(a[0]) - order.indexOf(b[0]);
@@ -211,6 +215,7 @@ export function ConfigPage() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

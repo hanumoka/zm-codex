@@ -14,6 +14,7 @@ import {
 import { api, subscribeSSE } from "../lib/api/client";
 import type { SSEEvent } from "../lib/api/client";
 import { clsx } from "clsx";
+import { usePageTour } from "../hooks/usePageTour";
 
 interface WatcherStatus {
   project_id: string;
@@ -58,6 +59,7 @@ const changeTypeConfig: Record<string, { icon: typeof FileEdit; color: string; l
 const fallbackChange = { icon: FileEdit, color: "text-zinc-400", label: "?" };
 
 export function WatcherPage() {
+  usePageTour("watcher");
   const [projectId, setProjectId] = useState<string | null>(null);
   const [watcherStatus, setWatcherStatus] = useState<WatcherStatus | null>(null);
   const [liveChanges, setLiveChanges] = useState<FileChange[]>([]);
@@ -174,6 +176,7 @@ export function WatcherPage() {
         <button
           onClick={isActive ? handleStop : handleStart}
           disabled={actionLoading || !projectId}
+          data-tour="watcher-toggle"
           className={clsx(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
             isActive
@@ -194,7 +197,7 @@ export function WatcherPage() {
       </div>
 
       {/* Status Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6" data-tour="watcher-status">
         <StatusCard
           icon={Eye}
           label="상태"
@@ -223,7 +226,7 @@ export function WatcherPage() {
 
       <div className="grid grid-cols-3 gap-6">
         {/* Live Change Feed */}
-        <div className="col-span-2">
+        <div className="col-span-2" data-tour="watcher-feed">
           <h2 className="text-lg font-semibold text-zinc-200 mb-3">실시간 변경 피드</h2>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             {liveChanges.length === 0 ? (
@@ -265,7 +268,7 @@ export function WatcherPage() {
         </div>
 
         {/* Drift Detection Panel */}
-        <div>
+        <div data-tour="watcher-drift">
           <h2 className="text-lg font-semibold text-zinc-200 mb-3">드리프트 감지</h2>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             {driftReports.length === 0 ? (
